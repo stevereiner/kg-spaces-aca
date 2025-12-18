@@ -1,0 +1,12 @@
+{
+  "name": "@integratedsemantics/kg-spaces",
+  "version": "0.1.0",
+  "description": "KG Spaces integration for Flexible GraphRAG",
+  "author": "Integrated Semantics",
+  "license": "LGPL-3.0",
+  "peerDependencies": {
+    "@angular/common": "^19.2.0",
+    "@angular/core": "^19.2.0"
+  },
+  "sideEffects": false
+}

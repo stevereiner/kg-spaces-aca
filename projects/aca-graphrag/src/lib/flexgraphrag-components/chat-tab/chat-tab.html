@@ -1,0 +1,93 @@
+<div class="chat-tab-container">
+  <!-- Removed header to save space - Clear History button moved to input area -->
+
+  <!-- Chat Messages -->
+  <mat-card class="chat-messages">
+    <div class="scroll-container" #chatContainer>
+    <!-- Welcome Message -->
+    <div *ngIf="chatMessages.length === 0" class="welcome-message">
+      <img [src]="agentIcon" alt="Agent" class="welcome-icon">
+      <h3>Welcome to Flexible GraphRAG Chat</h3>
+      <p>
+        Ask questions about your documents and get conversational answers.
+        <br />
+        The AI will provide detailed responses based on your processed documents.
+      </p>
+    </div>
+
+    <!-- Chat Messages List -->
+    <div *ngIf="chatMessages.length > 0" class="messages-list">
+      <div *ngFor="let message of chatMessages; let i = index" class="message-wrapper">
+        <div [class]="'message-container ' + (message.type === 'user' ? 'user-message' : 'assistant-message')">
+          <!-- Avatar -->
+          <div class="message-avatar" [class]="message.type + '-avatar'">
+            <mat-icon *ngIf="message.type === 'user'">person</mat-icon>
+            <img *ngIf="message.type === 'assistant'" [src]="agentIcon" alt="Agent" class="agent-avatar">
+          </div>
+
+          <!-- Message Content -->
+          <mat-card class="message-card" [class]="message.type + '-card'">
+            <mat-card-content>
+              <!-- Loading State -->
+              <div *ngIf="message.isLoading" class="loading-state">
+                <mat-spinner diameter="16"></mat-spinner>
+                <span>Thinking...</span>
+              </div>
+
+              <!-- Message Content -->
+              <div *ngIf="!message.isLoading">
+                <p class="message-text">{{ message.content }}</p>
+                <div class="message-time">
+                  {{ formatTime(message.timestamp) }}
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+    </div>
+  </mat-card>
+
+  <!-- Input Area -->
+  <div class="chat-input-area">
+    <mat-form-field appearance="outline" class="chat-input-field">
+      <mat-label>Ask a question...</mat-label>
+      <textarea 
+        matInput
+        [(ngModel)]="chatInput"
+        placeholder="Ask a question and press Enter or click arrow, Shift+Enter for a new line"
+        [disabled]="isQuerying"
+        (keydown.enter)="onEnterKey($event)"
+        cdkTextareaAutosize
+        cdkAutosizeMinRows="1"
+        cdkAutosizeMaxRows="3">
+      </textarea>
+    </mat-form-field>
+    
+    <button 
+      mat-fab 
+      color="primary"
+      [disabled]="!chatInput.trim() || isQuerying"
+      (click)="handleChatSubmit()"
+      class="send-button">
+      <mat-spinner *ngIf="isQuerying" diameter="20"></mat-spinner>
+      <mat-icon *ngIf="!isQuerying">send</mat-icon>
+    </button>
+
+    <button 
+      mat-stroked-button 
+      [disabled]="chatMessages.length === 0"
+      (click)="clearChatHistory()"
+      class="clear-history-button ml-2">
+      CLEAR HISTORY
+    </button>
+  </div>
+
+
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+</div>

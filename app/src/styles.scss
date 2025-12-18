@@ -3,6 +3,28 @@
 /* You can add global styles to this file, and also import other style files */
 @import '@fontsource/open-sans';
 
+/* KG Spaces viewer toolbar fixes */
+@import '../projects/aca-graphrag/src/lib/components/alfresco-tab/alfresco-tab-viewer.scss';
+
+/* KG Spaces sidenav icon spacing */
+.aca-sidenav {
+  // Add spacing between icon and label for KG Spaces item
+  button.aca-action-button[data-automation-id="app.navbar.kg-spaces"],
+  .aca-sidenav__section__actions__item[data-automation-id="app.navbar.kg-spaces"] button.aca-action-button,
+  .aca-expansion-panel-item[data-automation-id="app.navbar.kg-spaces"] button.aca-action-button,
+  nav[data-automation-id="app.navbar.kg-spaces"] button.aca-action-button {
+    // Target the icon component
+    adf-icon {
+      margin-right: 6px !important;
+      flex-shrink: 0 !important;
+    }
+
+    // Ensure flex layout
+    display: flex !important;
+    align-items: center !important;
+  }
+}
+
 body,
 html {
   height: 100%;

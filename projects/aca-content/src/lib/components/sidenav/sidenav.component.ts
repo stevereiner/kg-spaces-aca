@@ -23,7 +23,7 @@
  */
 
 import { Component, DestroyRef, inject, Input, OnInit, ViewEncapsulation } from '@angular/core';
-import { DynamicExtensionComponent, NavBarGroupRef, NavBarLinkRef } from '@alfresco/adf-extensions';
+import { DynamicExtensionComponent, NavBarGroupRef, NavBarLinkRef, sortByOrder } from '@alfresco/adf-extensions';
 import { Store } from '@ngrx/store';
 import { AppStore, getSideNavState } from '@alfresco/aca-shared/store';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -68,7 +68,9 @@ export class SidenavComponent implements OnInit {
       .select(getSideNavState)
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
-        this.groups = this.extensions.getApplicationNavigation(this.extensions.navbar);
+        const navigation = this.extensions.getApplicationNavigation(this.extensions.navbar);
+        // Sort groups by order to ensure proper positioning
+        this.groups = navigation.sort(sortByOrder);
       });
 
     this.appService.setAppNavbarMode(this.data.mode);

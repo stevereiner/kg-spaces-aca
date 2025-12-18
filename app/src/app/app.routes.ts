@@ -22,12 +22,12 @@
  * from Hyland Software. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AppLoginComponent } from './components/login/app-login.component';
+import { LoginProxyComponent } from './components/login/login-proxy.component';
 
 export const APP_ROUTES = [
   {
     path: 'login',
-    component: AppLoginComponent,
+    component: LoginProxyComponent,
     data: {
       title: 'APP.SIGN_IN'
     }

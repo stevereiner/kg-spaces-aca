@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.lib.json",
+  "compilerOptions": {
+    "declarationMap": false,
+    "skipLibCheck": true,
+    "paths": {
+      "@integratedsemantics/kg-spaces": [],
+      "@integratedsemantics/flexible-graphrag-angular": ["frontend-angular/dist/flexible-graphrag-angular", "frontend-angular/projects/flexible-graphrag-angular/src/public-api.ts"],
+      "@alfresco/aca-shared": ["dist/@alfresco/aca-shared"],
+      "@alfresco/aca-shared/store": ["dist/@alfresco/aca-shared/store"],
+      "@alfresco/aca-shared/rules": ["dist/@alfresco/aca-shared/rules"],
+      "@alfresco/aca-content": ["dist/@alfresco/aca-content"]
+    }
+  },
+  "angularCompilerOptions": {
+    "compilationMode": "partial"
+  }
+}

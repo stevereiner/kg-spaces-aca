@@ -1,0 +1,54 @@
+<div class="kg-spaces-container">
+  <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="kg-spaces-tabs">
+
+    <!-- Tab 1: Alfresco Data Source (ACA-specific, LGPL) -->
+    <mat-tab label="Alfresco">
+      <div class="tab-content">
+        <aca-kg-alfresco-tab
+          (sourcesConfigured)="onSourcesConfigured($event)"
+          (goToProcessing)="goToProcessing()">
+        </aca-kg-alfresco-tab>
+      </div>
+    </mat-tab>
+
+    <!-- Tab 2: Processing (FlexibleGraphRAG library, Apache 2.0) -->
+    <mat-tab label="Processing">
+      <div class="tab-content">
+        <app-processing-tab
+          [hasConfiguredSources]="hasConfiguredSources"
+          [configuredDataSource]="configuredDataSource"
+          [configuredFiles]="configuredFiles"
+          [configuredFolderPath]="configuredFolderPath"
+          [repositoryItemsHidden]="repositoryItemsHidden"
+          [configuredCmisConfig]="configuredCmisConfig"
+          [configuredAlfrescoConfig]="configuredAlfrescoConfig"
+          [configuredWebConfig]="configuredWebConfig"
+          [configuredWikipediaConfig]="configuredWikipediaConfig"
+          [configuredYoutubeConfig]="configuredYoutubeConfig"
+          [configuredCloudConfig]="configuredCloudConfig"
+          [configuredEnterpriseConfig]="configuredEnterpriseConfig"
+          [configurationTimestamp]="configurationTimestamp"
+          (goToSources)="goToSources()"
+          (removeRepositoryFile)="removeRepositoryFile($any($event))"
+          (removeUploadFile)="removeUploadFile($any($event))">
+        </app-processing-tab>
+      </div>
+    </mat-tab>
+
+    <!-- Tab 3: Search (FlexibleGraphRAG library, Apache 2.0) -->
+    <mat-tab label="Hybrid Search">
+      <div class="tab-content">
+        <app-search-tab></app-search-tab>
+      </div>
+    </mat-tab>
+
+    <!-- Tab 4: AI Chat (FlexibleGraphRAG library, Apache 2.0) -->
+    <mat-tab label="AI Chat">
+      <div class="tab-content">
+        <app-chat-tab></app-chat-tab>
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
+</div>
+

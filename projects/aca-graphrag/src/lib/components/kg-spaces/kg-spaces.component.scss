@@ -1,0 +1,124 @@
+// stylelint-disable selector-class-pattern, declaration-no-important, no-descending-specificity, selector-pseudo-element-no-unknown
+
+// Viewer toolbar fixes for KG Spaces (inlined from alfresco-tab-viewer.scss)
+// High specificity to ensure it overrides default styles
+.mat-toolbar.adf-toolbar-container-row.mat-toolbar-single-row.adf-toolbar-container,
+.mat-toolbar.adf-toolbar-container-row.mat-toolbar-single-row,
+.mat-toolbar.adf-toolbar-container-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+
+.mat-toolbar.adf-toolbar-container-row button.adf-viewer-close-button.mat-mdc-icon-button.mdc-icon-button.mat-mdc-button-base,
+.mat-toolbar.adf-toolbar-container-row button.adf-viewer-close-button.mat-mdc-icon-button.mdc-icon-button,
+.mat-toolbar.adf-toolbar-container-row button.adf-viewer-close-button.mat-mdc-icon-button,
+.mat-toolbar button.adf-viewer-close-button {
+  margin-left: auto !important;
+  order: 999 !important;
+}
+
+.app-preview .mat-toolbar {
+  display: flex !important;
+
+  button.adf-viewer-close-button.mat-mdc-icon-button,
+  button.adf-viewer-close-button {
+    margin-left: auto !important;
+    order: 999 !important;
+  }
+}
+
+// Styles for KG Spaces navbar item spacing and icon
+// These styles are applied globally to the sidenav
+.aca-sidenav {
+  // Add significant spacing before KG Spaces group to separate it from Saved Searches above
+  // Target the group container by its ID (added via data-automation-id in sidenav template)
+  .aca-sidenav__section__actions[data-automation-id="app.navbar.kg-spaces-group"] {
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid var(--theme-divider-color, rgba(0, 0, 0, 0.12));
+  }
+
+  // Fallback: use :has() selector if data attribute not available
+  .aca-sidenav__section__actions:has([data-automation-id="app.navbar.kg-spaces"]) {
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid var(--theme-divider-color, rgba(0, 0, 0, 0.12));
+  }
+
+  // Add spacing between icon and label for KG Spaces item
+  // Target multiple possible structures to ensure it works
+  button.aca-action-button[data-automation-id="app.navbar.kg-spaces"],
+  .aca-sidenav__section__actions__item[data-automation-id="app.navbar.kg-spaces"] button.aca-action-button,
+  .aca-expansion-panel-item[data-automation-id="app.navbar.kg-spaces"] button.aca-action-button {
+    // Target the icon component (adf-icon renders as mat-icon or similar)
+    adf-icon,
+    mat-icon,
+    .mat-icon,
+    [class*="icon"] {
+      margin-right: 6px !important;
+      margin-left: 0 !important;
+      flex-shrink: 0 !important;
+      display: inline-block !important;
+    }
+
+    // Also add margin to the label as backup
+    .action-button__label,
+    .aca-action-button__label,
+    span.action-button__label,
+    span.aca-action-button__label {
+      margin-left: 0 !important;
+    }
+
+    // Ensure flex layout
+    display: flex !important;
+    align-items: center !important;
+    gap: 0 !important; // Disable gap, use margin instead
+  }
+
+  // Also target by the nav item wrapper
+  nav[data-automation-id="app.navbar.kg-spaces"] {
+    button.aca-action-button {
+      adf-icon,
+      mat-icon,
+      .mat-icon,
+      [class*="icon"] {
+        margin-right: 6px !important;
+        flex-shrink: 0 !important;
+      }
+
+      .action-button__label,
+      .aca-action-button__label,
+      span.action-button__label,
+      span.aca-action-button__label {
+        margin-left: 0 !important;
+      }
+    }
+  }
+}
+
+// stylelint-enable selector-class-pattern, declaration-no-important, no-descending-specificity, selector-pseudo-element-no-unknown
+
+.kg-spaces-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.kg-spaces-tabs {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+
+  ::ng-deep .mat-mdc-tab-body-wrapper {
+    flex: 1;
+  }
+}
+
+.tab-content {
+  padding: 24px;
+  height: 100%;
+  overflow: auto;
+}
+

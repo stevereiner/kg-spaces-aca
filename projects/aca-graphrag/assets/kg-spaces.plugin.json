@@ -1,0 +1,110 @@
+{
+  "$schema": "../../../../extension.schema.json",
+  "$id": "kg-spaces-plugin",
+  "$name": "KG Spaces Plugin",
+  "$version": "0.1.0",
+  "$vendor": "Integrated Semantics",
+  "$license": "LGPL-3.0",
+  "$description": "KG Spaces integration for FlexibleGraphRAG",
+
+  "actions": [
+    {
+      "id": "kg.actions.open",
+      "type": "NAVIGATE_URL",
+      "payload": "/kg-spaces"
+    },
+    {
+      "id": "kg.actions.open-processing",
+      "type": "NAVIGATE_URL",
+      "payload": "/kg-spaces?tab=processing"
+    },
+    {
+      "id": "kg.actions.process-selected",
+      "type": "NAVIGATE_URL",
+      "payload": "$('/kg-spaces?tab=processing&nodeIds=' + encodeURIComponent(context.selection.nodes.map(n => n.entry.id).join(',')) + '&nodeNames=' + encodeURIComponent(context.selection.nodes.map(n => n.entry.name).join(',')) + '&isFiles=' + encodeURIComponent(context.selection.nodes.map(n => (n.entry.isFile ? 'true' : 'false')).join(',')) + '&path=' + encodeURIComponent(context.selection.first.entry.path.name || '/') + '&name=' + encodeURIComponent(context.selection.nodes.length > 1 ? context.selection.nodes.length + ' items' : context.selection.first.entry.name) + (context.selection.nodes.length === 1 ? ('&isFile=' + (context.selection.first.entry.isFile ? 'true' : 'false')) : ''))"
+    }
+  ],
+
+  "routes": [
+    {
+      "id": "app.kg-spaces",
+      "path": "kg-spaces",
+      "layout": "app.layout.main",
+      "component": "kg.spaces.component",
+      "children": [
+        {
+          "id": "kg-spaces.viewer",
+          "path": "view/:nodeId",
+          "outlet": "viewer",
+          "component": "app.components.preview",
+          "data": {
+            "navigateSource": "kg-spaces"
+          }
+        },
+        {
+          "id": "kg-spaces.viewer.version",
+          "path": "view/:nodeId/:versionId",
+          "outlet": "viewer",
+          "component": "app.components.preview",
+          "data": {
+            "navigateSource": "kg-spaces"
+          }
+        }
+      ]
+    }
+  ],
+
+  "features": {
+    "toolbar": [
+      {
+        "id": "kg.toolbar.process",
+        "title": "Configure",
+        "description": "Configure selected for GraphRAG processing",
+        "icon": "hub",
+        "order": 100,
+        "actions": {
+          "click": "kg.actions.process-selected"
+        },
+        "rules": {
+          "visible": [
+            "kg.rules.canProcessWithGraphRAG",
+            "!kg.rules.isKgSpaces"
+          ]
+        }
+      }
+    ],
+    "contextMenu": [
+      {
+        "id": "kg.context.process",
+        "title": "Configure",
+        "icon": "hub",
+        "order": 100,
+        "actions": {
+          "click": "kg.actions.process-selected"
+        },
+        "rules": {
+          "visible": "kg.rules.canProcessWithGraphRAG"
+        }
+      }
+    ],
+    "navbar": [
+      {
+        "id": "app.navbar.kg-spaces-group",
+        "order": 400,
+        "items": [
+          {
+            "id": "app.navbar.kg-spaces",
+            "order": 100,
+            "title": "KG Spaces",
+            "description": "KG Spaces - Process and query documents with GraphRAG",
+            "icon": "hub",
+            "route": "kg-spaces"
+          }
+        ]
+      }
+    ],
+    "content-metadata-presets": [],
+    "viewer": {}
+  }
+}
+

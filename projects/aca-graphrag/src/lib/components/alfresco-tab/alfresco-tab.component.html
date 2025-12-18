@@ -1,0 +1,98 @@
+<aca-page-layout>
+  <div class="aca-page-layout-header">
+    <div class="aca-header-container">
+      <div class="alfresco-tab-header-left">
+        <adf-breadcrumb
+          [root]="title"
+          [folderNode]="node || null"
+          [selectedRowItemsCount]="selectedRowItemsCount"
+          [maxItems]="isSmallScreen ? 1 : 0"
+          (navigate)="onBreadcrumbNavigate($any($event))" />
+        <p class="alfresco-tab-subtitle">Use configure to setup processing for Graph RAG / Vector RAG</p>
+      </div>
+      <div class="alfresco-tab-header-right">
+        <!-- Backend now supports multiple folders and mixed selections - canProcessSelection() simplified to allow any selection -->
+        <button
+          mat-raised-button
+          color="primary"
+          class="configure-selection-button"
+          [disabled]="!canProcessSelection()"
+          (click)="configureSelection()">
+          <mat-icon>hub</mat-icon>
+          Configure
+        </button>
+        <aca-toolbar [items]="actions" />
+      </div>
+    </div>
+  </div>
+
+  <div class="aca-page-layout-content">
+    <div class="aca-main-content">
+      <adf-document-list
+        #documentList
+        acaDocumentList
+        acaContextActions
+        [currentFolderId]="currentFolderId"
+        [selectionMode]="'multiple'"
+        [multiselect]="true"
+        [navigate]="false"
+        [sorting]="['name', 'asc']"
+        [showHeader]="showHeader"
+        [isResizingEnabled]="true"
+        [displayCheckboxesOnHover]="true"
+        [imageResolver]="imageResolver"
+        (node-dblclick)="handleNodeClick($event)"
+        (name-click)="handleNodeClick($event)"
+        (selectedItemsCountChanged)="onSelectedItemsCountChanged($any($event))">
+
+        <data-columns>
+          <ng-container *ngFor="let column of columns; trackBy: trackByColumnId">
+            <ng-container *ngIf="column.template">
+              <data-column
+                [id]="column.id"
+                [key]="column.key"
+                [title]="column.title!"
+                [type]="column.type"
+                [format]="column.format!"
+                [class]="column.class!"
+                [sortable]="column.sortable"
+                [sortingKey]="column.sortingKey || column.key"
+                [isHidden]="column.isHidden!"
+                [draggable]="column.draggable!"
+                [resizable]="column.resizable!">
+                <ng-template let-context>
+                  <adf-dynamic-column [id]="column.template" [context]="context" />
+                </ng-template>
+              </data-column>
+            </ng-container>
+
+            <ng-container *ngIf="!column.template">
+              <data-column
+                [id]="column.id"
+                [key]="column.key"
+                [title]="column.title!"
+                [type]="column.type"
+                [format]="column.format!"
+                [class]="column.class!"
+                [sortable]="column.sortable"
+                [sortingKey]="column.sortingKey || column.key"
+                [isHidden]="column.isHidden!"
+                [draggable]="column.draggable!"
+                [resizable]="column.resizable!" />
+            </ng-container>
+          </ng-container>
+        </data-columns>
+
+        <adf-custom-empty-content-template>
+          <adf-empty-content
+            icon="folder_open"
+            title="This folder is empty"
+            subtitle="Add files or create folders to get started">
+          </adf-empty-content>
+        </adf-custom-empty-content-template>
+      </adf-document-list>
+
+      <adf-pagination [target]="documentList"></adf-pagination>
+    </div>
+  </div>
+</aca-page-layout>

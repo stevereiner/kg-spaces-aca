@@ -144,6 +144,7 @@
     "navbar": [
       {
         "id": "app.navbar.primary",
+        "order": 100,
         "items": [
           {
             "id": "app.navbar.menu",
@@ -216,6 +217,7 @@
       },
       {
         "id": "app.navbar.secondary",
+        "order": 200,
         "items": [
           {
             "id": "app.search.navbar",

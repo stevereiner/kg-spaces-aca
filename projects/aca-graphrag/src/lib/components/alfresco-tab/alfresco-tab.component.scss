@@ -1,0 +1,26 @@
+.alfresco-tab-header-left {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 4px;
+
+  .alfresco-tab-subtitle {
+    margin: 0;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.6);
+    padding-left: 0;
+  }
+}
+
+.alfresco-tab-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .configure-selection-button {
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+

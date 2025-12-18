@@ -76,6 +76,11 @@
             "output": "./assets/plugins"
           },
           {
+            "glob": "kg-spaces.plugin.json",
+            "input": "projects/aca-graphrag/assets",
+            "output": "./assets/plugins"
+          },
+          {
             "glob": "**/*",
             "input": "projects/aca-content/folder-rules/assets",
             "output": "./assets/folder-rules"
@@ -204,7 +209,7 @@
         "buildTarget": "content-ce:build",
         "port": 4200,
         "disableHostCheck": true,
-        "open": true,
+        "open": false,
         "proxyConfig": "app/proxy.conf.js"
       },
       "configurations": {

@@ -43,6 +43,8 @@ testem.log
 /www
 .env
 .eslintcache
+/memory-bank
+frontend-angular/node_modules
 
 # e2e
 /e2e/*.map
@@ -62,3 +64,4 @@ Thumbs.db
 
 .nx/cache
 .nx/workspace-data
+.angular

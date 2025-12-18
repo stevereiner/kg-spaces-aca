@@ -1,0 +1,93 @@
+<div class="search-tab-container">
+  <mat-tab-group [(selectedIndex)]="activeTabIndex" (selectedTabChange)="onTabChange()" animationDuration="0ms">
+    <mat-tab label="HYBRID SEARCH">
+      <div class="tab-content">
+        <!-- Search Input -->
+        <div class="search-input-row">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Search terms</mat-label>
+            <input
+              matInput
+              [(ngModel)]="question"
+              placeholder="e.g., machine learning algorithms"
+              (keyup.enter)="handleSearch()"
+              [disabled]="isQuerying">
+          </mat-form-field>
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="isQuerying || !question.trim()"
+            (click)="handleSearch()"
+            class="search-button">
+            <mat-spinner *ngIf="isQuerying" diameter="20"></mat-spinner>
+            <span *ngIf="!isQuerying">SEARCH</span>
+          </button>
+        </div>
+
+        <!-- Search Results -->
+        <div *ngIf="searchResults.length > 0" class="results-section">
+          <h3>Search Results ({{ searchResults.length }})</h3>
+          <mat-card *ngFor="let result of searchResults; let i = index" class="result-card">
+            <mat-card-content>
+              <div class="result-meta">
+                <strong>Source:</strong> {{ result.metadata?.source || 'Unknown' }} |
+                <strong> Score:</strong> {{ result.score?.toFixed(3) || 'N/A' }}
+              </div>
+              <p class="result-content">{{ result.text || result.content || 'No content available' }}</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- No Results -->
+        <mat-card
+          *ngIf="hasSearched && searchResults.length === 0 && !isQuerying"
+          class="no-results-card">
+          <mat-card-content>
+            <h3>No results found</h3>
+            <p>No results found for "{{ lastSearchQuery }}". Try different search terms.</p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="AI Query">
+      <div class="tab-content">
+        <!-- Q&A Input -->
+        <div class="search-input-row">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Ask a question</mat-label>
+            <input
+              matInput
+              [(ngModel)]="question"
+              placeholder="e.g., What are the key findings?"
+              (keyup.enter)="handleSearch()"
+              [disabled]="isQuerying">
+          </mat-form-field>
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="isQuerying || !question.trim()"
+            (click)="handleSearch()"
+            class="search-button">
+            <mat-spinner *ngIf="isQuerying" diameter="20"></mat-spinner>
+            <span *ngIf="!isQuerying">Ask</span>
+          </button>
+        </div>
+
+        <!-- Q&A Answer -->
+        <mat-card *ngIf="qaAnswer" class="answer-card">
+          <mat-card-content>
+            <div class="answer-content">
+              <strong>Answer:</strong> {{ qaAnswer }}
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+</div>

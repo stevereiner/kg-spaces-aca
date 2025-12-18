@@ -1,5 +1,6 @@
-const { BASE_URL } = process.env;
+const { BASE_URL, GRAPHRAG_URL } = process.env;
 console.log('Using backend URL: ' + (BASE_URL || 'unknown'));
+console.log('Using GraphRAG URL: ' + (GRAPHRAG_URL || 'http://localhost:8000'));
 
 module.exports = {
   '/alfresco': {
@@ -14,5 +15,11 @@ module.exports = {
         request.setHeader('origin', BASE_URL);
       }
     }
+  },
+  '/api': {
+    target: GRAPHRAG_URL || 'http://localhost:8000',
+    secure: false,
+    changeOrigin: true,
+    logLevel: 'debug'
   }
 };

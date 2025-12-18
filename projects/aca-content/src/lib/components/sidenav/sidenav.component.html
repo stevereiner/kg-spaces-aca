@@ -2,7 +2,10 @@
   <app-sidenav-header (toggleNavBar)="toggleClick()" />
 
   <div class="aca-sidenav__section">
-    <div *ngFor="let group of groups; trackBy: trackByGroupId" class="aca-sidenav__section__actions">
+    <div
+      *ngFor="let group of groups; trackBy: trackByGroupId"
+      class="aca-sidenav__section__actions"
+      [attr.data-automation-id]="group.id">
       <nav
         [attr.aria-label]="item.title | translate"
         class="aca-sidenav__section__actions__item"

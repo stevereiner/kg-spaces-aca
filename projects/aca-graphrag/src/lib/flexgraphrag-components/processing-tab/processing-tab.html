@@ -1,0 +1,175 @@
+<div class="processing-tab-container">
+  <div class="header-row">
+    <h2>File Processing</h2>
+    <mat-checkbox
+      class="skip-graph-checkbox"
+      [checked]="skipGraph"
+      [disabled]="!hasConfiguredSources"
+      (change)="onSkipGraphChange($event)">
+      Skip graph (search + vector only) for these documents
+    </mat-checkbox>
+  </div>
+  <!-- Template updated -->
+
+  <!-- No Sources Configured Message -->
+  <mat-card *ngIf="!hasConfiguredSources" class="no-sources-card">
+    <mat-card-content>
+      <h3>No Data Source Configured</h3>
+      <p>Please go to the Sources tab to configure your data source first.</p>
+      <button mat-raised-button color="primary" (click)="goToSources.emit()">
+        ← Go to Sources
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- File Processing Table -->
+  <mat-card *ngIf="hasConfiguredSources" class="processing-card">
+    <table mat-table [dataSource]="displayFiles" class="processing-table">
+      <!-- Checkbox Column -->
+      <ng-container matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-checkbox
+            [checked]="isAllSelected()"
+            [indeterminate]="isIndeterminate()"
+            (change)="toggleAllSelection($event)">
+          </mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let file; let i = index">
+          <mat-checkbox
+            [checked]="isSelected(i)"
+            (change)="toggleSelection(i, $event)">
+          </mat-checkbox>
+        </td>
+      </ng-container>
+
+      <!-- Filename Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Filename</th>
+        <td mat-cell *matCellDef="let file" class="filename-cell">
+          <div class="filename-text" [title]="file.name">{{ file.name }}</div>
+        </td>
+      </ng-container>
+
+      <!-- File Size Column -->
+      <ng-container matColumnDef="size">
+        <th mat-header-cell *matHeaderCellDef>File Size</th>
+        <td mat-cell *matCellDef="let file">
+          <span class="file-size">
+            {{ file.size > 0 ? formatFileSize(file.size) :
+               file.type === 'repository' ? 'Repository' : '-' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Progress Column -->
+      <ng-container matColumnDef="progress">
+        <th mat-header-cell *matHeaderCellDef>Progress</th>
+        <td mat-cell *matCellDef="let file" class="progress-cell">
+          <div class="progress-container">
+            <mat-progress-bar
+              [value]="Math.max(getFileProgress(file.name), 2)"
+              mode="determinate"
+              class="progress-bar">
+            </mat-progress-bar>
+            <span class="progress-text">
+              {{ getFileProgress(file.name) }}% - {{ getFilePhase(file.name) }}
+            </span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Remove Column -->
+      <ng-container matColumnDef="remove">
+        <th mat-header-cell *matHeaderCellDef class="text-center"></th>
+        <td mat-cell *matCellDef="let file; let i = index">
+          <button
+            mat-icon-button
+            color="warn"
+            (click)="removeFile(i)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let file">
+          <mat-chip
+            [color]="getStatusColor(getFileStatus(file.name))"
+            [class]="'status-chip' + (getFileStatus(file.name) === 'completed' ? ' mat-mdc-chip-success' : '')">
+            {{ getFileStatus(file.name) }}
+          </mat-chip>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </mat-card>
+
+  <!-- Processing Status -->
+  <mat-card *ngIf="isProcessing" class="status-card">
+    <mat-card-content>
+      <div class="status-header">
+        <div class="status-info">
+          <mat-spinner diameter="20"></mat-spinner>
+          <span>{{ processingStatus || 'Processing documents...' }}</span>
+        </div>
+        <button
+          mat-stroked-button
+          color="warn"
+          [disabled]="!currentProcessingId"
+          (click)="cancelProcessing()">
+          Cancel
+        </button>
+      </div>
+
+      <div class="progress-info">
+        <mat-progress-bar [value]="processingProgress" mode="determinate"></mat-progress-bar>
+        <p class="progress-details">
+          Overall Progress: {{ processingProgress }}% complete
+          <span *ngIf="statusData?.estimated_time_remaining">
+            • Est. time remaining: {{ statusData?.estimated_time_remaining }}
+          </span>
+        </p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <button
+      mat-raised-button
+      color="primary"
+      [disabled]="!canStartProcessing()"
+      [class.loading]="isProcessing"
+      (click)="startProcessing()">
+      {{ getProcessingButtonText() }}
+    </button>
+
+    <button
+      *ngIf="selectedItems.size > 0 && displayFiles.length > 0"
+      mat-stroked-button
+      color="warn"
+      (click)="removeSelectedFiles()">
+      <mat-icon>delete</mat-icon>
+      REMOVE SELECTED ({{ selectedItems.size }})
+    </button>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="message success-message">
+    {{ successMessage }}
+    <button mat-icon-button class="close-button" (click)="successMessage = ''" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div *ngIf="error" class="message error-message">
+    {{ error }}
+    <button mat-icon-button class="close-button" (click)="error = ''" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+</div>

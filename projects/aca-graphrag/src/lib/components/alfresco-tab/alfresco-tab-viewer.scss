@@ -1,0 +1,35 @@
+/**
+ * Viewer toolbar fixes for KG Spaces
+ * High specificity to ensure it overrides default styles
+ */
+
+// Target the toolbar containers
+.mat-toolbar.adf-toolbar-container-row.mat-toolbar-single-row.adf-toolbar-container,
+.mat-toolbar.adf-toolbar-container-row.mat-toolbar-single-row,
+.mat-toolbar.adf-toolbar-container-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+
+// Target the close button with VERY high specificity
+.mat-toolbar.adf-toolbar-container-row button.adf-viewer-close-button.mat-mdc-icon-button.mdc-icon-button.mat-mdc-button-base,
+.mat-toolbar.adf-toolbar-container-row button.adf-viewer-close-button.mat-mdc-icon-button.mdc-icon-button,
+.mat-toolbar.adf-toolbar-container-row button.adf-viewer-close-button.mat-mdc-icon-button,
+.mat-toolbar button.adf-viewer-close-button {
+  margin-left: auto !important;
+  order: 999 !important;
+}
+
+// Also through app-preview
+.app-preview .mat-toolbar {
+  display: flex !important;
+  
+  button.adf-viewer-close-button.mat-mdc-icon-button,
+  button.adf-viewer-close-button {
+    margin-left: auto !important;
+    order: 999 !important;
+  }
+}
+

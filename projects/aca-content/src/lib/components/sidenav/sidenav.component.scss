@@ -41,7 +41,9 @@
   }
 
   .aca-sidenav__section {
-    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    overflow-y: hidden;
 
     .aca-expansion-panel {
       width: 100%;
