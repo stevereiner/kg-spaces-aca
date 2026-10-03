@@ -1,0 +1,45 @@
+{
+  "plugins": {
+    "kgSpaces": {
+      "apiUrl": "/api",
+      "defaultFolderPath": "/Shared/GraphRAG",
+      "alfrescoBaseUrl": "http://localhost:8080",
+      "_comment_alfrescoBaseUrl": "Where the Flexible GraphRAG BACKEND reaches Alfresco (server to server). NOT ecmHost, which is where the browser reaches it -- in dev that is ACA on :4200 behind a proxy.",
+      "agentIconUrl": "assets/plugins/agent.png",
+      "_comment_recursive": "Whether a FOLDER selected in ACA and sent to KG Spaces is ingested with its subfolders (true) or only the documents directly in it (false). Auto change sync then covers the same scope.",
+      "recursive": false,
+      "_comment_enabledSources": "Which data sources the OTHER SOURCES tab offers, in picker order. 'alfresco' is left out on purpose: ACA's own document list is the Alfresco picker here. Add \"alfresco\" back (see _sample_enabledSources_FullList) to also get the source form, which could be useful for a DIFFERENT Alfresco server than the one you signed in to, with its own basic/ticket/oauth2 credentials. Trim the list to offer fewer.",
+      "_sample_enabledSources_FullList": [
+        "upload",
+        "alfresco",
+        "nuxeo",
+        "cmis",
+        "web",
+        "wikipedia",
+        "youtube",
+        "google_drive",
+        "onedrive",
+        "s3",
+        "azure_blob",
+        "gcs",
+        "box",
+        "sharepoint"
+      ],
+      "enabledSources": [
+        "upload",
+        "nuxeo",
+        "cmis",
+        "web",
+        "wikipedia",
+        "youtube",
+        "google_drive",
+        "onedrive",
+        "s3",
+        "azure_blob",
+        "gcs",
+        "box",
+        "sharepoint"
+      ]
+    }
+  }
+}

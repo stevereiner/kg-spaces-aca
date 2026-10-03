@@ -1,0 +1,8 @@
+# Files that run inside Linux containers must keep LF endings. With core.autocrlf=true a
+# Windows checkout would otherwise turn the shebang into "#!/bin/sh\r" and the container's
+# entrypoint hook would fail to start.
+*.sh                 text eol=lf
+docker/**            text eol=lf
+*.mjs                text eol=lf
+*.png                binary
+*.tgz                binary

@@ -1,0 +1,79 @@
+{
+  "$schema": "../../../node_modules/@alfresco/adf-extensions/src/schema.json",
+  "$id": "kg-spaces",
+  "$name": "KG Spaces",
+  "$version": "1.0.0",
+  "$vendor": "Integrated Semantics",
+  "$license": "Apache-2.0",
+  "$description": "Knowledge graph and hybrid search over Alfresco content, powered by Flexible GraphRAG",
+  "$runtime": "2.0.0",
+  "routes": [
+    {
+      "id": "kg-spaces.route",
+      "path": "kg-spaces",
+      "layout": "app.layout.main",
+      "component": "kg-spaces.main.component"
+    }
+  ],
+  "features": {
+    "navbar": [
+      {
+        "id": "app.navbar.primary",
+        "items": [
+          {
+            "id": "kg-spaces.navbar.link",
+            "order": 500,
+            "icon": "hub",
+            "title": "KG Spaces",
+            "description": "Hybrid search, AI chat and other sources",
+            "route": "kg-spaces"
+          }
+        ]
+      }
+    ],
+    "toolbar": [
+      {
+        "id": "kg-spaces.toolbar.process",
+        "title": "Add to KG Spaces",
+        "description": "Add to KG Spaces",
+        "icon": "hub",
+        "order": 600,
+        "actions": {
+          "click": "kg-spaces.actions.process-selected"
+        },
+        "rules": {
+          "visible": [
+            "kg-spaces.rules.canProcess",
+            "!kg-spaces.rules.isKgSpaces"
+          ]
+        }
+      }
+    ],
+    "contextMenu": [
+      {
+        "id": "kg-spaces.context.process",
+        "title": "Add to KG Spaces",
+        "icon": "hub",
+        "order": 600,
+        "actions": {
+          "click": "kg-spaces.actions.process-selected"
+        },
+        "rules": {
+          "visible": "kg-spaces.rules.canProcess"
+        }
+      }
+    ]
+  },
+  "actions": [
+    {
+      "id": "kg-spaces.actions.open",
+      "type": "NAVIGATE_URL",
+      "payload": "/kg-spaces"
+    },
+    {
+      "id": "kg-spaces.actions.process-selected",
+      "type": "NAVIGATE_URL",
+      "payload": "$('/kg-spaces?tab=processing&nodeIds=' + encodeURIComponent(context.selection.nodes.map(n => n.entry.id).join(',')) + '&nodeNames=' + encodeURIComponent(context.selection.nodes.map(n => n.entry.name).join(',')) + '&isFolder=' + encodeURIComponent(context.selection.nodes.map(n => !!n.entry.isFolder).join(',')))"
+    }
+  ]
+}

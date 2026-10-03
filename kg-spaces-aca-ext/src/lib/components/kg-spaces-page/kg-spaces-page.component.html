@@ -1,0 +1,42 @@
+<div class="kg-spaces-page">
+  <mat-card class="kg-spaces-card">
+    <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="kg-spaces-tabs">
+      <mat-tab label="OTHER SOURCES">
+        <app-sources-tab
+          (configureProcessing)="onConfigureProcessing()"
+          (sourcesConfigured)="onSourcesConfigured($event)">
+        </app-sources-tab>
+      </mat-tab>
+
+      <mat-tab label="PROCESSING">
+        <app-processing-tab
+          [hasConfiguredSources]="hasConfiguredSources"
+          [configuredDataSource]="configuredDataSource"
+          [configuredFiles]="configuredFiles"
+          [configuredFolderPath]="configuredFolderPath"
+          [repositoryItemsHidden]="repositoryItemsHidden"
+          [configuredCmisConfig]="configuredCmisConfig"
+          [configuredAlfrescoConfig]="configuredAlfrescoConfig"
+          [configuredNuxeoConfig]="configuredNuxeoConfig"
+          [configuredWebConfig]="configuredWebConfig"
+          [configuredWikipediaConfig]="configuredWikipediaConfig"
+          [configuredYoutubeConfig]="configuredYoutubeConfig"
+          [configuredCloudConfig]="configuredCloudConfig"
+          [configuredEnterpriseConfig]="configuredEnterpriseConfig"
+          [configurationTimestamp]="configurationTimestamp"
+          (goToSources)="selectedTabIndex = 0"
+          (removeRepositoryFile)="removeRepositoryFile($event)"
+          (removeUploadFile)="removeUploadFile($event)">
+        </app-processing-tab>
+      </mat-tab>
+
+      <mat-tab label="HYBRID SEARCH">
+        <app-search-tab></app-search-tab>
+      </mat-tab>
+
+      <mat-tab label="AI CHAT">
+        <app-chat-tab></app-chat-tab>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card>
+</div>
