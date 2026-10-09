@@ -35,7 +35,7 @@
       </mat-tab>
 
       <mat-tab label="AI CHAT">
-        <app-chat-tab></app-chat-tab>
+        <app-chat-tab [scope]="chatScope" (scopeChange)="chatScope = $event"></app-chat-tab>
       </mat-tab>
     </mat-tab-group>
   </mat-card>

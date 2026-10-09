@@ -9,6 +9,6 @@
     "@alfresco/adf-extensions": "^9.0.0",
     "@alfresco/js-api": "^10.0.0",
     "@angular/core": "^20.3.0",
-    "@flexible-graphrag/angular-ui": "^0.8.2"
+    "@flexible-graphrag/angular-ui": "^0.8.3"
   }
 }

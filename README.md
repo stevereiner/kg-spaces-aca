@@ -63,7 +63,7 @@ ticket expires and cannot renew itself.
   [Docker Compose setup](https://stevereiner.github.io/flexible-graphrag/HOME/HOME-DOCKER/) can
   include Alfresco Community together with OpenSearch or Elasticsearch, either dedicated to
   Alfresco or shared with Flexible GraphRAG. Not tested with Alfresco Enterprise.
-* A running Flexible GraphRAG 0.8.2+ backend (default `http://localhost:8000`).
+* A running Flexible GraphRAG 0.8.3+ backend (default `http://localhost:8000`).
 * Flexible GraphRAG and ACA both configured for your Alfresco.
 * An [ACA 8.0.0](https://github.com/Alfresco/alfresco-content-app) checkout (Angular 20.3, ADF 9.0).
 * Node.js 24 — ACA 8.0.0 pins 24.13.1 in its `.nvmrc`. (Not needed for the
@@ -151,6 +151,9 @@ Merge [`config/app.config.snippet.json`](config/app.config.snippet.json) into
 | `agentIconUrl` | AI-chat avatar; the extension ships its own copy |
 | `enabledSources` | which sources the **OTHER SOURCES** tab offers, in picker order |
 | `recursive` | whether a selected **folder** brings its subfolders along (default `false`) |
+| `noSourcesMessage`, `goToSourcesLabel` | the **PROCESSING** tab's text and button when nothing is selected yet |
+| `chatWelcomeTitle`, `chatWelcomeLines` | the **AI CHAT** welcome (default *Welcome to KG Spaces Chat*) |
+| `showChatScope` | show the AI CHAT *Asking about: …* bar (default `true`) |
 
 **Folders and subfolders.** With `recursive: false` (the default), a folder selected in ACA
 ingests only the documents directly in it; set `"recursive": true` to include every subfolder
@@ -195,7 +198,7 @@ docker build -t kg-spaces-aca -f docker/Dockerfile .
 ```
 
 The shared UI library comes from npm by default (`LIB_SOURCE=npm`, latest version; pin one with
-`--build-arg LIB_VERSION=0.8.2`). Two other sources are there for unreleased library changes:
+`--build-arg LIB_VERSION=0.8.3`). Two other sources are there for unreleased library changes:
 
 **From a Flexible GraphRAG clone.** The build clones `FG_REPO` at `FG_REF` and packs the
 library inside the image:
@@ -294,16 +297,19 @@ covers each one in detail.
 **1. Select content.** Multi-select in ACA — files, folders, or a mix. Each selected node
 appears as its own row on the PROCESSING tab, so a partial selection stays a partial selection.
 A folder brings the documents directly in it, or its whole subtree with `recursive` set
-([step 5](#5-configure-the-backend-url)). A row already in the stores — kept current by auto
-change sync, or ingested earlier — shows **already synced** or **already ingested** and starts
-unchecked; check it to ingest it again, which replaces the earlier copy rather than adding a
-second one.
+([step 5](#5-configure-the-backend-url)). Each row's **Status** says which stores it is in
+now (*search+vector, graphs*, *search+vector*, *not ingested*, *removed*); rows already in the
+stores start unchecked.
 
-**2. Choose options.** Optionally tick **Skip graph (search + vector only)** to index for
-vector and full-text search but skip knowledge-graph extraction, which is much faster — graph
-building is LLM-bound and takes minutes per hundred chunks. Tick **Enable auto change sync** to
-keep the selection up to date afterwards: documents added, changed or deleted in Alfresco are
-re-ingested or removed automatically. This needs incremental updates enabled on the backend
+**2. Choose options.** Per row, **Search+Vector** and **Graphs** say what it should end up in
+(the column headers set every row). Leaving Graphs off indexes for vector and full-text search
+only, which is much faster — graph building is LLM-bound and takes minutes per hundred chunks.
+Changing a row checks it; **START PROCESSING** then ingests, refreshes, removes the graphs, or
+removes the row from every store, as one job. Tick **Run in background** to keep the tab free
+and follow the job on the **Jobs** sub-tab. Check a row's **Auto Sync** to keep it up to date
+afterwards: documents added, changed or deleted in Alfresco are re-ingested or removed
+automatically. Unchecking it stops the sync, and unchecking all three columns removes the row
+and its sync completely. Auto Sync needs incremental updates enabled on the backend
 (`ENABLE_INCREMENTAL_UPDATES=true`), and sync runs as the backend's configured Alfresco service
 account rather than your session, since a login ticket expires.
 
@@ -313,6 +319,16 @@ account rather than your session, since a login ticket expires.
 full-text, vector and graph retrieval, or switch to **AI QUERY** to ask a question and get a
 natural-language answer. On **AI CHAT**, ask a series of questions in a conversation; chat
 history is kept only for the current session and is not saved.
+
+**Ask about one document or folder.** Right-click a document or folder in ACA (or use the
+toolbar / More actions menu) and choose **Ask KG Spaces about this document** or **Ask KG
+Spaces about this folder**. AI CHAT opens with an *Asking about: …* bar, and answers come only
+from that document or folder; each store filters inside the store, so the usual number of
+results is spent on it. If nothing from it has been processed yet, the answer says to add it to KG Spaces first.
+
+**Answers only from documents you may read.** Search results, AI QUERY and AI CHAT answers
+come only from Alfresco documents your own signed-in user can read: the backend checks your
+session ticket with Alfresco at question time, not the service account that ingested them.
 
 ### What is doing the work
 

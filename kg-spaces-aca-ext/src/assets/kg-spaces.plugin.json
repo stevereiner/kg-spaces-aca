@@ -47,6 +47,39 @@
             "!kg-spaces.rules.isKgSpaces"
           ]
         }
+      },
+      {
+        "id": "app.toolbar.more",
+        "children": [
+          {
+            "id": "kg-spaces.toolbar.ask-document",
+            "order": 91,
+            "icon": "hub",
+            "title": "Ask KG Spaces about this document",
+            "actions": {
+              "click": "kg-spaces.actions.ask-about"
+            },
+            "rules": {
+              "visible": [
+                "app.selection.file"
+              ]
+            }
+          },
+          {
+            "id": "kg-spaces.toolbar.ask-folder",
+            "order": 92,
+            "icon": "hub",
+            "title": "Ask KG Spaces about this folder",
+            "actions": {
+              "click": "kg-spaces.actions.ask-about"
+            },
+            "rules": {
+              "visible": [
+                "app.selection.folder"
+              ]
+            }
+          }
+        ]
       }
     ],
     "contextMenu": [
@@ -61,8 +94,54 @@
         "rules": {
           "visible": "kg-spaces.rules.canProcess"
         }
+      },
+      {
+        "id": "kg-spaces.context.ask-document",
+        "order": 601,
+        "icon": "hub",
+        "title": "Ask KG Spaces about this document",
+        "actions": {
+          "click": "kg-spaces.actions.ask-about"
+        },
+        "rules": {
+          "visible": [
+            "app.selection.file"
+          ]
+        }
+      },
+      {
+        "id": "kg-spaces.context.ask-folder",
+        "order": 602,
+        "icon": "hub",
+        "title": "Ask KG Spaces about this folder",
+        "actions": {
+          "click": "kg-spaces.actions.ask-about"
+        },
+        "rules": {
+          "visible": [
+            "app.selection.folder"
+          ]
+        }
       }
-    ]
+    ],
+    "viewer": {
+      "toolbarActions": [
+        {
+          "id": "app.viewer.toolbar.more",
+          "children": [
+            {
+              "id": "kg-spaces.viewer.ask-document",
+              "order": 10,
+              "icon": "hub",
+              "title": "Ask KG Spaces about this document",
+              "actions": {
+                "click": "kg-spaces.actions.ask-about"
+              }
+            }
+          ]
+        }
+      ]
+    }
   },
   "actions": [
     {
@@ -74,6 +153,11 @@
       "id": "kg-spaces.actions.process-selected",
       "type": "NAVIGATE_URL",
       "payload": "$('/kg-spaces?tab=processing&nodeIds=' + encodeURIComponent(context.selection.nodes.map(n => n.entry.id).join(',')) + '&nodeNames=' + encodeURIComponent(context.selection.nodes.map(n => n.entry.name).join(',')) + '&isFolder=' + encodeURIComponent(context.selection.nodes.map(n => !!n.entry.isFolder).join(',')))"
+    },
+    {
+      "id": "kg-spaces.actions.ask-about",
+      "type": "NAVIGATE_URL",
+      "payload": "$('/kg-spaces?tab=chat&nodeId=' + encodeURIComponent(context.selection.first.entry.id) + '&nodeName=' + encodeURIComponent(context.selection.first.entry.name) + '&isFolder=' + !!context.selection.first.entry.isFolder)"
     }
   ]
 }

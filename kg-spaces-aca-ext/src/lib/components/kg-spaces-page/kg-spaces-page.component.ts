@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -6,7 +6,8 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { FlexibleGraphragUiModule } from '@flexible-graphrag/angular-ui';
 import { findEcmTicket } from '../../services/ecm-ticket.util';
 import { AcaSelectionService } from '../../services/aca-selection.service';
-import { FlexibleGraphragConfigService } from '@flexible-graphrag/angular-ui';
+import { FlexibleGraphragConfigService, ProcessingSessionService } from '@flexible-graphrag/angular-ui';
+import type { AskScope } from '@flexible-graphrag/angular-ui';
 import { AppConfigService } from '@alfresco/adf-core';
 
 /**
@@ -26,11 +27,12 @@ import { AppConfigService } from '@alfresco/adf-core';
   templateUrl: './kg-spaces-page.component.html',
   styleUrls: ['./kg-spaces-page.component.scss']
 })
-export class KgSpacesPageComponent implements OnInit {
+export class KgSpacesPageComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly selection = inject(AcaSelectionService);
   private readonly fgConfig = inject(FlexibleGraphragConfigService);
   private readonly appConfig = inject(AppConfigService);
+  private readonly session = inject(ProcessingSessionService);
 
   selectedTabIndex = 0;
 
@@ -48,6 +50,10 @@ export class KgSpacesPageComponent implements OnInit {
   configuredCloudConfig: any = null;
   configuredEnterpriseConfig: any = null;
   configurationTimestamp = 0;
+  /** AI CHAT answers only from this document / folder ("Ask KG Spaces about this ..."). */
+  chatScope: AskScope | null = null;
+
+  private static readonly CHAT_TAB = 3;
 
   /**
    * Pick up a selection handed over by the toolbar button or context menu, which navigate to
@@ -56,8 +62,15 @@ export class KgSpacesPageComponent implements OnInit {
    */
   ngOnInit(): void {
     const params = this.route.snapshot.queryParamMap;
+    if (params.get('tab') === 'chat' && params.get('nodeId')) {
+      this.askAbout(params.get('nodeId')!, params.get('nodeName') || '', params.get('isFolder') === 'true');
+      return;
+    }
     const nodeIds = (params.get('nodeIds') || '').split(',').map((s) => s.trim()).filter(Boolean);
     if (!nodeIds.length) {
+      // Opened without a selection (the navbar link, or coming back from elsewhere in ACA):
+      // this page is a route, so leaving destroyed it -- take back what it had.
+      this.restoreSelection();
       return;
     }
     if (params.get('tab') === 'processing') {
@@ -93,6 +106,57 @@ export class KgSpacesPageComponent implements OnInit {
       this.hasConfiguredSources = true;
       this.configurationTimestamp = Date.now();
     });
+  }
+
+  /**
+   * "Ask KG Spaces about this document / folder": open AI CHAT scoped to that node. The
+   * Processing tab keeps whatever selection it had. The backend matches the scope by node id
+   * (a document) or by path (a folder covers everything below it), so resolve the path.
+   */
+  private askAbout(nodeId: string, name: string, isFolder: boolean): void {
+    this.restoreSelection();
+    this.selectedTabIndex = KgSpacesPageComponent.CHAT_TAB;
+    this.chatScope = { data_source: 'alfresco', url: this.fgConfig.alfrescoBaseUrl,
+                       node_id: nodeId, is_folder: isFolder, name: name || undefined };
+    this.selection.resolveNodeDetails([nodeId]).subscribe((details) => {
+      const node = details[0];
+      if (node && this.chatScope?.node_id === nodeId) {
+        this.chatScope = { ...this.chatScope, path: node.path, name: name || node.name, is_folder: !!node.isFolder };
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.session.hostSelection = {
+      chatScope: this.chatScope,
+      selectedTabIndex: this.selectedTabIndex,
+      hasConfiguredSources: this.hasConfiguredSources,
+      configuredDataSource: this.configuredDataSource,
+      configuredFiles: this.configuredFiles,
+      configuredFolderPath: this.configuredFolderPath,
+      repositoryItemsHidden: this.repositoryItemsHidden,
+      configuredCmisConfig: this.configuredCmisConfig,
+      configuredAlfrescoConfig: this.configuredAlfrescoConfig,
+      configuredNuxeoConfig: this.configuredNuxeoConfig,
+      configuredWebConfig: this.configuredWebConfig,
+      configuredWikipediaConfig: this.configuredWikipediaConfig,
+      configuredYoutubeConfig: this.configuredYoutubeConfig,
+      configuredCloudConfig: this.configuredCloudConfig,
+      configuredEnterpriseConfig: this.configuredEnterpriseConfig,
+      configurationTimestamp: this.configurationTimestamp,
+    };
+  }
+
+  private restoreSelection(): void {
+    const saved = this.session.hostSelection;
+    if (!saved) {
+      return;
+    }
+    Object.assign(this, saved);
+    // The ticket may have been renewed since; never hand the backend a stale one
+    if (this.configuredAlfrescoConfig?.auth_method === 'ticket') {
+      this.configuredAlfrescoConfig = this.withAcaTicket(this.configuredAlfrescoConfig);
+    }
   }
 
   /** The folder every selected node sits in, or '/' when they do not share one. */
@@ -143,8 +207,37 @@ export class KgSpacesPageComponent implements OnInit {
     };
   }
 
-  removeRepositoryFile(_index: number): void {
-    /* repository items are contributed by ACA's own selection, not removed here yet */
+  /**
+   * A row's ✕ on the Processing tab: drop that node from the selection (rows are the
+   * nodeDetails, in order). A plain path source from the OTHER SOURCES tab has one row, which is
+   * hidden instead, as in the standalone app.
+   */
+  removeRepositoryFile(index: number): void {
+    const cfg = this.configuredAlfrescoConfig;
+    const nodes: any[] = this.configuredDataSource === 'alfresco' ? cfg?.nodeDetails || [] : [];
+    if (!nodes.length) {
+      this.repositoryItemsHidden = true;
+      return;
+    }
+    const removed = nodes[index];
+    const nodeDetails = nodes.filter((_, i) => i !== index);
+    if (!nodeDetails.length) {
+      this.hasConfiguredSources = false;
+      this.configuredDataSource = '';
+      this.configuredFolderPath = '';
+      this.configuredAlfrescoConfig = null;
+      return;
+    }
+    const path = nodeDetails.length === 1
+      ? nodeDetails[0].path
+      : this.commonParent(nodeDetails.map((n) => n.path));
+    this.configuredFolderPath = path;
+    this.configuredAlfrescoConfig = {
+      ...cfg,
+      path,
+      nodeDetails,
+      nodeIds: (cfg.nodeIds || []).filter((id: string) => id !== removed?.id),
+    };
   }
 
   removeUploadFile(index: number): void {

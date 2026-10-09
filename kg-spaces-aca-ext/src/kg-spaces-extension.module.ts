@@ -8,7 +8,8 @@ import { kgSpacesConfigFactory } from './lib/services/kg-spaces-config';
 import { canProcessWithGraphRAG, isKgSpacesRoute } from './lib/rules/kg-spaces.evaluators';
 
 /**
- * Puts a gap between the KG Spaces nav icon and its label.
+ * Puts a gap between the KG Spaces nav icon and its label, and lets ACA's menus be wide
+ * enough for "Ask KG Spaces about this document" on one line.
  *
  * ACA renders a top-level nav item that has no children with
  * `<span class="action-button__label">` -- no `aca-` prefix -- while its stylesheet only styles
@@ -24,7 +25,15 @@ function addKgSpacesStyles(): void {
   const style = doc.createElement('style');
   style.id = 'kg-spaces-styles';
   style.textContent =
-    '[data-automation-id="kg-spaces.navbar.link"] .action-button__label { margin-left: 8px; }';
+    '[data-automation-id="kg-spaces.navbar.link"] .action-button__label { margin-left: 8px; }' +
+    // Menus size to their longest entry up to Material's 280px cap, which wrapped
+    // "Ask KG Spaces about this document"; a higher cap only lets a menu grow when it needs to.
+    ' .mat-mdc-menu-panel { max-width: 340px !important; }' +
+    // ...and keep our entries' titles on one line inside it (ACA gives each menu button the
+    // extension item's id). !important because Material sets white-space: normal on the
+    // entry's inner text span with the same specificity, and its styles load after ours.
+    ' [id^="kg-spaces."].mat-mdc-menu-item, [id^="kg-spaces."] .mat-mdc-menu-item-text,' +
+    ' [id^="kg-spaces."] .mat-mdc-menu-item-text span { white-space: nowrap !important; }';
   doc.head.appendChild(style);
 }
 
