@@ -1,5 +1,6 @@
 import { EnvironmentProviders, NgModule, Provider, inject, provideAppInitializer } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
+import { Router } from '@angular/router';
 import { provideExtensionConfig, provideExtensions } from '@alfresco/adf-extensions';
 import { AppConfigService } from '@alfresco/adf-core';
 import { FLEXIBLE_GRAPHRAG_CONFIG } from '@flexible-graphrag/angular-ui';
@@ -52,7 +53,7 @@ export function provideKgSpacesExtension(): (Provider | EnvironmentProviders)[] 
     {
       provide: FLEXIBLE_GRAPHRAG_CONFIG,
       useFactory: kgSpacesConfigFactory,
-      deps: [AppConfigService]
+      deps: [AppConfigService, Router]
     },
     provideExtensions({
       components: {

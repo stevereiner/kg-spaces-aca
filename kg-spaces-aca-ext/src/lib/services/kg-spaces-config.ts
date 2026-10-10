@@ -1,5 +1,6 @@
+import { Router } from '@angular/router';
 import { AppConfigService } from '@alfresco/adf-core';
-import { FlexibleGraphragConfig } from '@flexible-graphrag/angular-ui';
+import { FlexibleGraphragConfig, SourceDocument } from '@flexible-graphrag/angular-ui';
 import { findEcmTicket } from './ecm-ticket.util';
 
 /**
@@ -9,7 +10,23 @@ import { findEcmTicket } from './ecm-ticket.util';
  * Only `apiUrl` really matters here: the Alfresco base URL comes from ACA's `ecmHost`, and the
  * other source types keep the library's defaults.
  */
-export function kgSpacesConfigFactory(appConfig: AppConfigService): FlexibleGraphragConfig {
+export function kgSpacesConfigFactory(appConfig: AppConfigService, router: Router): FlexibleGraphragConfig {
+  // An Alfresco document a result or answer came from opens in ACA's own viewer, in this tab,
+  // the way Angel Borroy's ext-rag does, with `location` sending the viewer's close (X) back to
+  // KG Spaces. It opens over the document's folder in the Repository view (the backend supplies
+  // parent_id), so the breadcrumb shows where the file lives; over search when that is unknown.
+  // The page restores its tab, search results and chat from ProcessingSessionService.
+  const isAlfrescoNode = (doc: SourceDocument) => doc.source_type === 'alfresco' && !!doc.node_id;
+  const openInViewer = (doc: SourceDocument): boolean => {
+    if (!isAlfrescoNode(doc)) {
+      return false;
+    }
+    const under = doc.parent_id ? ['/repository', doc.parent_id] : ['/search'];
+    void router.navigate([...under, { outlets: { viewer: ['view', doc.node_id] } }],
+                         { queryParams: { location: '/kg-spaces' } });
+    return true;
+  };
+
   return {
     apiUrl: appConfig.get<string>('plugins.kgSpaces.apiUrl', '/api'),
     // NOT ecmHost. ecmHost is where the BROWSER reaches Alfresco -- in dev that is ACA's own
@@ -35,6 +52,9 @@ export function kgSpacesConfigFactory(appConfig: AppConfigService): FlexibleGrap
       'Use "Ask KG Spaces about this document" or "...this folder" in ACA to ask about just that.',
     ]),
     showChatScope: appConfig.get<boolean>('plugins.kgSpaces.showChatScope', true),
+    // Result / answer source documents: Alfresco nodes open in ACA's viewer (see above)
+    openDocument: openInViewer,
+    canOpenDocument: isAlfrescoNode,
     // Every search / chat question carries the signed-in user's ticket, so the backend answers
     // only from Alfresco documents this user may read (checked at question time -- ACLs change
     // after ingest). Read per request: ADF renews the ticket.
