@@ -21,6 +21,13 @@ import { AppConfigService } from '@alfresco/adf-core';
  * ingest payload (`alfrescoConfig.ticket`), never captured from a login form. The backend
  * accepts it as a pass-through credential, so no password is involved anywhere in this flow.
  */
+
+/** Same Alfresco server? (an /alfresco suffix, trailing slashes and case don't matter) */
+function sameAlfrescoServer(a: string, b: string): boolean {
+  const norm = (u: string) => (u || '').trim().replace(/\/+$/, '').replace(/\/alfresco$/i, '').toLowerCase();
+  return norm(a) === norm(b);
+}
+
 @Component({
   selector: 'kg-spaces-page',
   imports: [CommonModule, MatCardModule, MatTabsModule, FlexibleGraphragUiModule],
@@ -193,6 +200,11 @@ export class KgSpacesPageComponent implements OnInit, OnDestroy {
   private withAcaTicket(alfrescoConfig: any): any {
     if (!alfrescoConfig) {
       return null;
+    }
+    // Only ACA's own Alfresco server: an OTHER SOURCES form pointed at a different server keeps
+    // the credentials entered for it (ACA's ticket is not valid there).
+    if (alfrescoConfig.url && !sameAlfrescoServer(alfrescoConfig.url, this.fgConfig.alfrescoBaseUrl)) {
+      return alfrescoConfig;
     }
     const ticket = findEcmTicket();
     if (!ticket) {

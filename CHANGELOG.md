@@ -4,6 +4,23 @@ All notable changes to KG Spaces for Alfresco Content App are documented in this
 follow the [Flexible GraphRAG](https://github.com/stevereiner/flexible-graphrag) release they go
 with, and the `@flexible-graphrag/angular-ui` library version they need.
 
+## [2026-10-17] — Other Sources: ingest from another Alfresco server
+
+### Changed
+
+- **Other Sources Alfresco form** (enable it by adding `"alfresco"` to `plugins.kgSpaces.enabledSources`):
+  - It can ingest from **another Alfresco server**, using the credentials entered in the form.
+  - Before, ACA's ticket replaced them for every URL, so another server's ingest was refused.
+  - ACA's own server still uses the ACA sign-in. The form now says so and hides the credential
+    fields (from `@flexible-graphrag/angular-ui`).
+- **Search and AI chat in KG Spaces stay limited to what ACA's sign-in can read.** Documents from
+  another server are left out. They no longer make the whole search fail (Flexible GraphRAG
+  backend fix).
+- Source forms no longer pre-fill credentials, and the browser's password manager no longer
+  autofills them (from `@flexible-graphrag/angular-ui`).
+- Requires the updated `@flexible-graphrag/angular-ui` and Flexible GraphRAG backend from
+  2026-10-17 (install a local build with `scripts/install-lib-into-aca.sh` until released).
+
 ## [2026-10-10] — v0.8.4: open source documents in ACA's viewer, results and answers name their documents
 
 ### Added
