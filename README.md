@@ -1,7 +1,7 @@
 # KG Spaces for Alfresco Content App (ACA)
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Flexible GraphRAG](https://img.shields.io/badge/Flexible%20GraphRAG-0.8.4-2E7D32.svg)](https://github.com/stevereiner/flexible-graphrag)
+[![Flexible GraphRAG](https://img.shields.io/badge/Flexible%20GraphRAG-0.8.5-2E7D32.svg)](https://github.com/stevereiner/flexible-graphrag)
 [![ACA](https://img.shields.io/badge/Alfresco%20Content%20App-8.0.0-00BCD4.svg)](https://github.com/Alfresco/alfresco-content-app)
 [![ADF](https://img.shields.io/badge/Alfresco%20ADF-9.0.0-7C4DFF.svg)](https://github.com/Alfresco/alfresco-ng2-components)
 [![Angular](https://img.shields.io/badge/Angular-20.3-DD0031.svg)](https://angular.dev/)
@@ -64,7 +64,7 @@ ticket expires and cannot renew itself.
   [Docker Compose setup](https://stevereiner.github.io/flexible-graphrag/HOME/HOME-DOCKER/) can
   include Alfresco Community together with OpenSearch or Elasticsearch, either dedicated to
   Alfresco or shared with Flexible GraphRAG. Not tested with Alfresco Enterprise.
-* A running Flexible GraphRAG 0.8.4+ backend (default `http://localhost:8000`).
+* A running Flexible GraphRAG 0.8.5+ backend (default `http://localhost:8000`).
 * Flexible GraphRAG and ACA both configured for your Alfresco.
 * An [ACA 8.0.0](https://github.com/Alfresco/alfresco-content-app) checkout (Angular 20.3, ADF 9.0).
 * Node.js 24 — ACA 8.0.0 pins 24.13.1 in its `.nvmrc`. (Not needed for the
@@ -199,7 +199,7 @@ docker build -t kg-spaces-aca -f docker/Dockerfile .
 ```
 
 The shared UI library comes from npm by default (`LIB_SOURCE=npm`, latest version; pin one with
-`--build-arg LIB_VERSION=0.8.4`). Two other sources are there for unreleased library changes:
+`--build-arg LIB_VERSION=0.8.5`). Two other sources are there for unreleased library changes:
 
 **From a Flexible GraphRAG clone.** The build clones `FG_REPO` at `FG_REF` and packs the
 library inside the image:

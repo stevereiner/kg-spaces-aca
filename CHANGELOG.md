@@ -4,6 +4,15 @@ All notable changes to KG Spaces for Alfresco Content App are documented in this
 follow the [Flexible GraphRAG](https://github.com/stevereiner/flexible-graphrag) release they go
 with, and the `@flexible-graphrag/angular-ui` library version they need.
 
+## [2026-10-18] — v0.8.5 release
+
+Releases the [2026-10-17] change below as v0.8.5.
+
+### Changed
+
+- Version 0.8.5. Requires `@flexible-graphrag/angular-ui` ^0.8.5 (now on npm) and a Flexible GraphRAG 0.8.5+ backend.
+- README: Flexible GraphRAG 0.8.5 badge, backend requirement and the `LIB_VERSION` example.
+
 ## [2026-10-17] — Other Sources: ingest from another Alfresco server
 
 ### Changed
