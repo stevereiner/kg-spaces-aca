@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { FlexibleGraphragUiModule } from '@flexible-graphrag/angular-ui';
 import { findEcmTicket } from '../../services/ecm-ticket.util';
@@ -30,7 +31,7 @@ function sameAlfrescoServer(a: string, b: string): boolean {
 
 @Component({
   selector: 'kg-spaces-page',
-  imports: [CommonModule, MatCardModule, MatTabsModule, FlexibleGraphragUiModule],
+  imports: [CommonModule, MatCardModule, MatIconModule, MatTabsModule, FlexibleGraphragUiModule],
   templateUrl: './kg-spaces-page.component.html',
   styleUrls: ['./kg-spaces-page.component.scss']
 })
@@ -42,6 +43,13 @@ export class KgSpacesPageComponent implements OnInit, OnDestroy {
   private readonly session = inject(ProcessingSessionService);
 
   selectedTabIndex = 0;
+  /**
+   * The title bar's how-to line: its text (plugins.kgSpaces.titleHint; "" hides it) and when it
+   * shows (plugins.kgSpaces.titleHintMode): "untilUsed" (default) until this browser first uses
+   * Add to KG Spaces, "always", or "never".
+   */
+  titleHint = '';
+  private static readonly USED_KEY = 'kgSpaces.addToKgSpacesUsed';
 
   hasConfiguredSources = false;
   configuredDataSource = '';
@@ -69,6 +77,11 @@ export class KgSpacesPageComponent implements OnInit, OnDestroy {
    */
   ngOnInit(): void {
     const params = this.route.snapshot.queryParamMap;
+    // Arriving from Add to KG Spaces (a selection is handed over): the user knows the way now
+    if (params.get('nodeIds')) {
+      this.rememberAddUsed();
+    }
+    this.titleHint = this.hintToShow();
     if (params.get('tab') === 'chat' && params.get('nodeId')) {
       this.askAbout(params.get('nodeId')!, params.get('nodeName') || '', params.get('isFolder') === 'true');
       return;
@@ -131,6 +144,33 @@ export class KgSpacesPageComponent implements OnInit, OnDestroy {
         this.chatScope = { ...this.chatScope, path: node.path, name: name || node.name, is_folder: !!node.isFolder };
       }
     });
+  }
+
+  private hintToShow(): string {
+    const text = this.appConfig.get<string>('plugins.kgSpaces.titleHint',
+      'Select Alfresco files and folders in a list view and use Add to KG Spaces to process them here, ' +
+      'then use Hybrid Search, AI Query, and AI Chat.');
+    const mode = this.appConfig.get<string>('plugins.kgSpaces.titleHintMode', 'untilUsed');
+    if (!text || mode === 'never') {
+      return '';
+    }
+    return mode === 'always' || !this.addUsed() ? text : '';
+  }
+
+  private addUsed(): boolean {
+    try {
+      return localStorage.getItem(KgSpacesPageComponent.USED_KEY) === 'true';
+    } catch {
+      return false;  // storage blocked: keep showing the hint
+    }
+  }
+
+  private rememberAddUsed(): void {
+    try {
+      localStorage.setItem(KgSpacesPageComponent.USED_KEY, 'true');
+    } catch {
+      // storage blocked: the hint just keeps showing
+    }
   }
 
   ngOnDestroy(): void {

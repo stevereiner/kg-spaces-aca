@@ -4,6 +4,26 @@ All notable changes to KG Spaces for Alfresco Content App are documented in this
 follow the [Flexible GraphRAG](https://github.com/stevereiner/flexible-graphrag) release they go
 with, and the `@flexible-graphrag/angular-ui` library version they need.
 
+## [2026-10-19] — v0.8.6: sign-ins for the other sources, title bar
+
+### Added
+
+- **Title bar** above the tabs: the KG Spaces icon and name, a how-to line, and a sign-in pill for
+  the other sources in the stores (Nuxeo, CMIS, another Alfresco server, Microsoft 365, Box, Google,
+  Azure Storage, Amazon S3). ACA's own Alfresco never needs one: ACA's ticket covers it.
+- **Search and chat filter those sources too:** questions carry ACA's ticket plus the user's other
+  sign-ins; the Sources chips limit a question to some sources.
+- Settings: `plugins.kgSpaces.searchSignIn` (default `true`), `titleHint` (`""` hides it) and
+  `titleHintMode` (`untilUsed` default: hidden once the browser has used Add to KG Spaces;
+  `always`, `never`).
+- From the library: Processing columns for every source, and the Deep checkbox on the Alfresco,
+  Nuxeo and Box forms in Other Sources.
+
+### Changed
+
+- Version 0.8.6. Requires `@flexible-graphrag/angular-ui` ^0.8.6 and a Flexible GraphRAG 0.8.6+
+  backend.
+
 ## [2026-10-18] — v0.8.5 release
 
 Releases the [2026-10-17] change below as v0.8.5.

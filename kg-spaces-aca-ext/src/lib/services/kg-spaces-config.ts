@@ -62,6 +62,11 @@ export function kgSpacesConfigFactory(appConfig: AppConfigService, router: Route
       const ticket = findEcmTicket();
       return ticket ? { 'X-Alfresco-Ticket': ticket } : {};
     },
+    // ...and the user's sign-ins to every OTHER source (Nuxeo, CMIS, another Alfresco, Microsoft
+    // 365, Box, Google, Azure, S3) from the sign-in icon on the KG Spaces tab bar, so their
+    // documents are filtered to what this user may read as well. ACA's own Alfresco never asks:
+    // its ticket covers it. Set plugins.kgSpaces.searchSignIn false to send only ACA's ticket.
+    searchSignIn: appConfig.get<boolean>('plugins.kgSpaces.searchSignIn', true),
     // Alfresco is deliberately absent from the picker inside ACA, which is why the tab reads
     // OTHER SOURCES: ACA's own document list is the Alfresco picker here, and it expresses a
     // multi-select mixing files and folders, which this tab's single path field cannot.

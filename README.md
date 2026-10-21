@@ -1,7 +1,7 @@
 # KG Spaces for Alfresco Content App (ACA)
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Flexible GraphRAG](https://img.shields.io/badge/Flexible%20GraphRAG-0.8.5-2E7D32.svg)](https://github.com/stevereiner/flexible-graphrag)
+[![Flexible GraphRAG](https://img.shields.io/badge/Flexible%20GraphRAG-0.8.6-2E7D32.svg)](https://github.com/stevereiner/flexible-graphrag)
 [![ACA](https://img.shields.io/badge/Alfresco%20Content%20App-8.0.0-00BCD4.svg)](https://github.com/Alfresco/alfresco-content-app)
 [![ADF](https://img.shields.io/badge/Alfresco%20ADF-9.0.0-7C4DFF.svg)](https://github.com/Alfresco/alfresco-ng2-components)
 [![Angular](https://img.shields.io/badge/Angular-20.3-DD0031.svg)](https://angular.dev/)
@@ -58,13 +58,21 @@ Nothing captures a password, no ACA login component is replaced, and the backend
 the ticket — for auto-sync it substitutes a configured service account instead, because a
 ticket expires and cannot renew itself.
 
+The same ticket goes with every HYBRID SEARCH, AI QUERY and AI CHAT question (as a request
+header, read fresh each time since ADF renews it), so answers come only from Alfresco documents
+the signed-in user may read. Documents ingested from **other** sources (Nuxeo, CMIS, another
+Alfresco server, Microsoft 365, Box, Google, Azure Storage, Amazon S3) are filtered with the
+user's own sign-in to that source, from the sign-in pill in the KG Spaces title bar — see
+*Documents from other sources* under [Workflow](#workflow). ACA's own Alfresco is never asked
+for a second sign-in.
+
 ## Prerequisites
 
 * **Alfresco Community 26.2+**, running. Flexible GraphRAG's
   [Docker Compose setup](https://stevereiner.github.io/flexible-graphrag/HOME/HOME-DOCKER/) can
   include Alfresco Community together with OpenSearch or Elasticsearch, either dedicated to
   Alfresco or shared with Flexible GraphRAG. Not tested with Alfresco Enterprise.
-* A running Flexible GraphRAG 0.8.5+ backend (default `http://localhost:8000`).
+* A running Flexible GraphRAG 0.8.6+ backend (default `http://localhost:8000`).
 * Flexible GraphRAG and ACA both configured for your Alfresco.
 * An [ACA 8.0.0](https://github.com/Alfresco/alfresco-content-app) checkout (Angular 20.3, ADF 9.0).
 * Node.js 24 — ACA 8.0.0 pins 24.13.1 in its `.nvmrc`. (Not needed for the
@@ -147,14 +155,18 @@ Merge [`config/app.config.snippet.json`](config/app.config.snippet.json) into
 
 | Key | Purpose |
 | --- | --- |
-| `apiUrl` | Flexible GraphRAG backend, same-origin via the proxy |
-| `alfrescoBaseUrl` | where the **backend** reaches Alfresco, server to server. Not `ecmHost`, which is where the browser reaches it |
-| `agentIconUrl` | AI-chat avatar; the extension ships its own copy |
-| `enabledSources` | which sources the **OTHER SOURCES** tab offers, in picker order |
+| `apiUrl` | Flexible GraphRAG backend, same-origin via the proxy (default `/api`) |
+| `alfrescoBaseUrl` | where the **backend** reaches Alfresco, server to server (default `http://localhost:8080`). Not `ecmHost`, which is where the browser reaches it |
+| `agentIconUrl` | AI-chat avatar; the extension ships its own copy (default `assets/plugins/agent.png`) |
+| `defaultFolderPath` | the library's default folder path (default `/Shared/GraphRAG`); the current tabs do not use it |
+| `enabledSources` | which sources the **OTHER SOURCES** tab offers, in picker order (default: all but `alfresco`) |
 | `recursive` | whether a selected **folder** brings its subfolders along (default `false`) |
 | `noSourcesMessage`, `goToSourcesLabel` | the **PROCESSING** tab's text and button when nothing is selected yet |
 | `chatWelcomeTitle`, `chatWelcomeLines` | the **AI CHAT** welcome (default *Welcome to KG Spaces Chat*) |
 | `showChatScope` | show the AI CHAT *Asking about: …* bar (default `true`) |
+| `titleHint` | the how-to line in the title bar (`""` hides it) |
+| `titleHintMode` | when it shows: `untilUsed` (default: until this browser first uses **Add to KG Spaces**), `always` or `never` |
+| `searchSignIn` | the sign-in pill for the other sources, and their permission filtering (default `true`; `false` sends only ACA's ticket) |
 
 **Folders and subfolders.** With `recursive: false` (the default), a folder selected in ACA
 ingests only the documents directly in it; set `"recursive": true` to include every subfolder
@@ -199,7 +211,7 @@ docker build -t kg-spaces-aca -f docker/Dockerfile .
 ```
 
 The shared UI library comes from npm by default (`LIB_SOURCE=npm`, latest version; pin one with
-`--build-arg LIB_VERSION=0.8.5`). Two other sources are there for unreleased library changes:
+`--build-arg LIB_VERSION=0.8.6`). Two other sources are there for unreleased library changes:
 
 **From a Flexible GraphRAG clone.** The build clones `FG_REPO` at `FG_REF` and packs the
 library inside the image:
@@ -281,6 +293,15 @@ login.
   ingesting from OTHER SOURCES. It has no Alfresco picker of its own, so Alfresco content always
   starts from a selection in the document list.
 
+### The title bar
+
+Above the tabs, like ACA's own pages, a title bar shows the KG Spaces icon and name, a how-to
+line, and the **sign-in pill** at the right end. The how-to line shows until this browser first
+uses **Add to KG Spaces** (change its text or when it shows with `titleHint` / `titleHintMode`,
+[step 5](#5-configure-the-backend-url)). The sign-in pill lists the other sources whose
+documents are in the stores, each signed in or offline (e.g. "Sign-ins 1/3"); see
+*Documents from other sources* below. It is hidden with `searchSignIn: false`.
+
 ### The four tabs
 
 | Tab | What it does |
@@ -316,7 +337,10 @@ afterwards: documents added, changed or deleted in Alfresco are re-ingested or r
 automatically. Unchecking it stops the sync, and unchecking all three columns removes the row
 and its sync completely. Auto Sync needs incremental updates enabled on the backend
 (`ENABLE_INCREMENTAL_UPDATES=true`), and sync runs as the backend's configured Alfresco service
-account rather than your session, since a login ticket expires.
+account rather than your session, since a login ticket expires. Rows from OTHER SOURCES get the
+same per-row columns. With a Flexible GraphRAG 0.9.0+ backend, **Graphs** is split into separate
+**Graph** (property graph) and **RDF** columns. On OTHER SOURCES, the Alfresco, Nuxeo and Box
+forms have a **Deep** checkbox to include subfolders at any depth.
 
 ![KG Spaces PROCESSING tab in ACA](screen-shots/kg-spaces-aca-processing.png)
 
@@ -339,8 +363,21 @@ from that document or folder; each store filters inside the store, so the usual 
 results is spent on it. If nothing from it has been processed yet, the answer says to add it to KG Spaces first.
 
 **Answers only from documents you may read.** Search results, AI QUERY and AI CHAT answers
-come only from Alfresco documents your own signed-in user can read: the backend checks your
-session ticket with Alfresco at question time, not the service account that ingested them.
+come only from documents your own signed-in user can read: for ACA's Alfresco the backend checks
+your session ticket with Alfresco at question time, not the service account that ingested them;
+for other sources it uses your sign-ins to them (below).
+
+**Documents from other sources.** When the stores also hold documents from other sources (Nuxeo,
+CMIS, another Alfresco server, SharePoint / OneDrive, Box, Google Drive / Cloud Storage, Azure
+Blob, Amazon S3), the **sign-in pill** at the right end of the title bar lists them, with a
+signed-in count (e.g. "Sign-ins 1/3"). Sign in to each one to get its documents too, filtered to what you
+may read there; before a question KG Spaces asks for the ones still missing, or answer from the
+others with **Continue without**. ACA's own Alfresco never appears there: your ACA session
+covers it; a second Alfresco server ingested through OTHER SOURCES gets its own row. The
+**Sources** chips on HYBRID SEARCH (both modes) and AI CHAT limit a question to some sources,
+and then only their sign-ins are asked for. Setup per source (which sources need an app
+registered, and the backend settings that turn them on):
+[Sign-In and Permission-Aware Search](https://stevereiner.github.io/flexible-graphrag/DATA-SOURCES/SIGN-IN-GUIDE/).
 
 ### What is doing the work
 

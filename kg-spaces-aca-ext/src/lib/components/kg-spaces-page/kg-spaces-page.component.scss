@@ -1,12 +1,46 @@
 .kg-spaces-page {
+  display: flex;
+  flex-direction: column;
   height: 100%;
   overflow: auto;
   padding: 16px;
   box-sizing: border-box;
 }
 
+.kg-spaces-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  min-height: 48px;
+  margin-bottom: 8px;
+}
+
+.kg-spaces-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+// How to use the page, between the title and the sign-in pill; cut off with "…" when narrow
+// (the whole text is in its tooltip)
+.kg-spaces-hint {
+  margin-left: 32px;  // on top of the bar's gap: set apart from the title
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  opacity: 0.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .kg-spaces-card {
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   box-sizing: border-box;
 }
 

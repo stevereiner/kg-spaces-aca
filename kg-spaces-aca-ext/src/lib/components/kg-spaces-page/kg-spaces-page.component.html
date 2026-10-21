@@ -1,4 +1,11 @@
 <div class="kg-spaces-page">
+  <!-- title bar, like ACA's own page headers: the page name, and the sign-ins to the other sources
+       (ACA's own Alfresco needs none) at its right end -->
+  <div class="kg-spaces-title-bar">
+    <h1 class="kg-spaces-title"><mat-icon class="kg-spaces-title-icon">hub</mat-icon>KG Spaces</h1>
+    <span class="kg-spaces-hint" *ngIf="titleHint" [title]="titleHint">{{ titleHint }}</span>
+    <app-source-sign-in [light]="true"></app-source-sign-in>
+  </div>
   <mat-card class="kg-spaces-card">
     <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="kg-spaces-tabs">
       <mat-tab label="OTHER SOURCES">

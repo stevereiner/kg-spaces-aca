@@ -8,6 +8,12 @@
       "agentIconUrl": "assets/plugins/agent.png",
       "_comment_recursive": "Whether a FOLDER selected in ACA and sent to KG Spaces is ingested with its subfolders (true) or only the documents directly in it (false). Auto change sync then covers the same scope.",
       "recursive": false,
+      "_comment_searchSignIn": "Hybrid search, AI query and AI chat always send ACA's Alfresco ticket. true (default) also shows the sign-in pill in the title bar and sends the user's sign-ins to the OTHER sources in the stores (Nuxeo, CMIS, another Alfresco server, Microsoft 365, Box, Google, Azure Storage, Amazon S3), so their documents are filtered to what the user may read there too. false sends only ACA's ticket.",
+      "searchSignIn": true,
+      "_comment_titleHint": "The how-to line in the title bar above the tabs. \"\" hides it.",
+      "titleHint": "Select Alfresco files and folders in a list view and use Add to KG Spaces to process them here, then use Hybrid Search, AI Query, and AI Chat.",
+      "_comment_titleHintMode": "When the how-to line shows: \"untilUsed\" (default) until this browser first uses Add to KG Spaces, \"always\", or \"never\".",
+      "titleHintMode": "untilUsed",
       "_comment_enabledSources": "Which data sources the OTHER SOURCES tab offers, in picker order. 'alfresco' is left out on purpose: ACA's own document list is the Alfresco picker here. Add \"alfresco\" back (see _sample_enabledSources_FullList) to also get the source form, which could be useful for a DIFFERENT Alfresco server than the one you signed in to, with its own basic/ticket/oauth2 credentials. Trim the list to offer fewer.",
       "_sample_enabledSources_FullList": [
         "upload",
