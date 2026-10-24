@@ -2,10 +2,12 @@
 /**
  * Wire the KG Spaces extension into an Alfresco Content App checkout.
  *
- * Does install steps 3-5 from the README in one go, and is what the Docker build runs:
+ * Does install steps 3-6 from the README in one go, and is what the Docker build runs:
  *   3. register provideKgSpacesExtension() in app/src/app/extensions.module.ts
  *   4. add the plugin JSON and agent icon asset globs to app/project.json
  *   5. merge plugins.kgSpaces into app/src/app.config.json
+ *   6. add the /api entry (the Flexible GraphRAG backend) to the dev server's app/proxy.conf.js
+ *      (the dev server only; a production build doesn't use that file)
  *
  * Usage:  node scripts/patch-aca.mjs <aca-root> [config/app.config.snippet.json]
  *
@@ -95,5 +97,36 @@ const IMPORT_LINE =
     } else {
       console.log('app.config.json: plugins.kgSpaces already complete, left as is');
     }
+  }
+}
+
+// --- 6. app/proxy.conf.js /api entry (dev server) ----------------------------------------
+{
+  const file = join(acaRoot, 'app/proxy.conf.js');
+  let src;
+  try {
+    src = readFileSync(file, 'utf8');
+  } catch {
+    src = null;
+  }
+  if (src === null) {
+    console.log('proxy.conf.js: not found, skipped (add the /api entry from config/proxy.conf.snippet.js by hand)');
+  } else if (/['"]\/api['"]\s*:/.test(src)) {
+    console.log('proxy.conf.js: /api entry already present');
+  } else if (!/module\.exports\s*=\s*\{/.test(src)) {
+    console.log('proxy.conf.js: no "module.exports = {" found, skipped (add the /api entry from config/proxy.conf.snippet.js by hand)');
+  } else {
+    const entry = [
+      '',
+      '  // Flexible GraphRAG backend, for the KG Spaces extension (FG_BASE_URL for another one)',
+      "  '/api': {",
+      "    target: process.env.FG_BASE_URL || 'http://localhost:8000',",
+      '    secure: false,',
+      '    changeOrigin: true',
+      '  },',
+    ].join('\n');
+    src = src.replace(/module\.exports\s*=\s*\{/, (m) => m + entry);
+    writeFileSync(file, src);
+    console.log('proxy.conf.js: added the /api entry (FG_BASE_URL, default http://localhost:8000)');
   }
 }

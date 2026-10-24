@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,7 +9,7 @@ import { findEcmTicket } from '../../services/ecm-ticket.util';
 import { AcaSelectionService } from '../../services/aca-selection.service';
 import { FlexibleGraphragConfigService, ProcessingSessionService } from '@flexible-graphrag/angular-ui';
 import type { AskScope } from '@flexible-graphrag/angular-ui';
-import { AppConfigService } from '@alfresco/adf-core';
+import { AppConfigService, AuthenticationService } from '@alfresco/adf-core';
 
 /**
  * The KG Spaces page: the four Flexible GraphRAG tabs hosted inside ACA.
@@ -37,9 +37,11 @@ function sameAlfrescoServer(a: string, b: string): boolean {
 })
 export class KgSpacesPageComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly selection = inject(AcaSelectionService);
   private readonly fgConfig = inject(FlexibleGraphragConfigService);
   private readonly appConfig = inject(AppConfigService);
+  private readonly authentication = inject(AuthenticationService);
   private readonly session = inject(ProcessingSessionService);
 
   selectedTabIndex = 0;
@@ -81,6 +83,11 @@ export class KgSpacesPageComponent implements OnInit, OnDestroy {
     if (params.get('nodeIds')) {
       this.rememberAddUsed();
     }
+    // Read once: take the hand-over out of the address, so a page refresh starts clean instead
+    // of setting the same selection up again (leaving and coming back still restores it, below)
+    if (params.get('nodeIds') || params.get('nodeId')) {
+      void this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
+    }
     this.titleHint = this.hintToShow();
     if (params.get('tab') === 'chat' && params.get('nodeId')) {
       this.askAbout(params.get('nodeId')!, params.get('nodeName') || '', params.get('isFolder') === 'true');
@@ -96,7 +103,7 @@ export class KgSpacesPageComponent implements OnInit, OnDestroy {
     if (params.get('tab') === 'processing') {
       this.selectedTabIndex = 1;
     }
-    this.selection.resolveNodeDetails(nodeIds).subscribe((nodeDetails) => {
+    this.selection.resolveNodeDetails(nodeIds).subscribe(async (nodeDetails) => {
       if (!nodeDetails.length) {
         console.error(
           '[KG Spaces] none of the selected nodes could be resolved; the Processing tab will ' +
@@ -119,9 +126,7 @@ export class KgSpacesPageComponent implements OnInit, OnDestroy {
         path: parentPath,
         nodeIds,
         nodeDetails,
-        // Whether a selected folder brings its subfolders along. Off by default, like the
-        // backend: a folder picked in ACA ingests the documents directly in it.
-        recursive: this.appConfig.get<boolean>('plugins.kgSpaces.recursive', false)
+        recursive: await this.defaultRecursive()
       });
       this.hasConfiguredSources = true;
       this.configurationTimestamp = Date.now();
@@ -173,8 +178,28 @@ export class KgSpacesPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Whose this page's saved state is: the signed-in user's ACA ticket, as the shared library keys
+   * its search and chat state. ACA signs out without reloading the page, so a selection or a
+   * Processing tab kept in memory must not come back to the next sign-in.
+   */
+  /** ACA's signed-in user, for the title bar (ACA's own Alfresco: its session is the sign-in). */
+  get acaUser(): string | null {
+    return this.authentication.getUsername() || null;
+  }
+
+  /** ACA's Alfresco server, for the title bar's tooltip. */
+  get acaUrl(): string | null {
+    return this.appConfig.get<string>('ecmHost', '') || null;
+  }
+
+  private owner(): string {
+    return findEcmTicket() || '';
+  }
+
   ngOnDestroy(): void {
     this.session.hostSelection = {
+      owner: this.owner(),
       chatScope: this.chatScope,
       selectedTabIndex: this.selectedTabIndex,
       hasConfiguredSources: this.hasConfiguredSources,
@@ -199,7 +224,15 @@ export class KgSpacesPageComponent implements OnInit, OnDestroy {
     if (!saved) {
       return;
     }
-    Object.assign(this, saved);
+    if (saved['owner'] !== this.owner()) {
+      // signed out (and maybe someone else signed in) since: start empty, Processing tab included
+      this.session.hostSelection = null;
+      this.session.tab = null;
+      return;
+    }
+    const state = { ...saved };
+    delete state['owner'];
+    Object.assign(this, state);
     // The ticket may have been renewed since; never hand the backend a stale one
     if (this.configuredAlfrescoConfig?.auth_method === 'ticket') {
       this.configuredAlfrescoConfig = this.withAcaTicket(this.configuredAlfrescoConfig);
@@ -294,5 +327,22 @@ export class KgSpacesPageComponent implements OnInit, OnDestroy {
 
   removeUploadFile(index: number): void {
     this.configuredFiles = this.configuredFiles.filter((_, i) => i !== index);
+  }
+
+  /**
+   * Whether a selected folder brings its subfolders along: plugins.kgSpaces.recursive when set, else the
+   * backend's DEFAULT_RECURSIVE (GET /api/ui-defaults), else off (a backend before 0.9.0).
+   */
+  private async defaultRecursive(): Promise<boolean> {
+    const configured = this.appConfig.get<boolean | null>('plugins.kgSpaces.recursive', null);
+    if (typeof configured === 'boolean') {
+      return configured;
+    }
+    try {
+      const res = await fetch(`${this.fgConfig.apiUrl.replace(/\/+$/, '')}/ui-defaults`);
+      return res.ok ? !!(await res.json()).recursive : false;
+    } catch {
+      return false;
+    }
   }
 }

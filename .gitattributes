@@ -6,3 +6,4 @@ docker/**            text eol=lf
 *.mjs                text eol=lf
 *.png                binary
 *.tgz                binary
+*.bat                text eol=crlf

@@ -87,7 +87,11 @@ COPY --chmod=755 docker/40-kg-spaces-config.sh /docker-entrypoint.d/40-kg-spaces
 # owned by the nginx user so the entrypoint hook can rewrite app.config.json at startup
 COPY --chown=101:101 --from=builder /build/dist/content-ce /usr/share/nginx/html/
 
+# Alfresco and the backend are looked up per request through the container's DNS (NGINX_ENTRYPOINT_LOCAL_RESOLVERS:
+# the nginx image fills in NGINX_LOCAL_RESOLVERS for default.conf.template), so a backend container recreated with a
+# new address is found again
 ENV ALFRESCO_URL=http://host.docker.internal:8080 \
-    FLEXIBLE_GRAPHRAG_URL=http://host.docker.internal:8000
+    FLEXIBLE_GRAPHRAG_URL=http://host.docker.internal:8000 \
+    NGINX_ENTRYPOINT_LOCAL_RESOLVERS=1
 
 EXPOSE 8080

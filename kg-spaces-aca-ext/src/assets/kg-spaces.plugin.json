@@ -33,28 +33,36 @@
     ],
     "toolbar": [
       {
-        "id": "kg-spaces.toolbar.process",
-        "title": "Add to KG Spaces",
-        "description": "Add to KG Spaces",
-        "icon": "hub",
+        "id": "kg-spaces.toolbar.menu",
+        "type": "menu",
         "order": 600,
-        "actions": {
-          "click": "kg-spaces.actions.process-selected"
-        },
+        "icon": "hub",
+        "title": "KG Spaces",
+        "description": "KG Spaces",
         "rules": {
           "visible": [
-            "kg-spaces.rules.canProcess",
             "!kg-spaces.rules.isKgSpaces"
           ]
-        }
-      },
-      {
-        "id": "app.toolbar.more",
+        },
         "children": [
           {
-            "id": "kg-spaces.toolbar.ask-document",
-            "order": 91,
+            "id": "kg-spaces.toolbar.process",
+            "order": 10,
             "icon": "hub",
+            "title": "Add to KG Spaces",
+            "actions": {
+              "click": "kg-spaces.actions.process-selected"
+            },
+            "rules": {
+              "visible": [
+                "kg-spaces.rules.canProcess"
+              ]
+            }
+          },
+          {
+            "id": "kg-spaces.toolbar.ask-document",
+            "order": 20,
+            "icon": "question_answer",
             "title": "Ask KG Spaces about this document",
             "actions": {
               "click": "kg-spaces.actions.ask-about"
@@ -67,8 +75,8 @@
           },
           {
             "id": "kg-spaces.toolbar.ask-folder",
-            "order": 92,
-            "icon": "hub",
+            "order": 30,
+            "icon": "question_answer",
             "title": "Ask KG Spaces about this folder",
             "actions": {
               "click": "kg-spaces.actions.ask-about"
@@ -98,7 +106,7 @@
       {
         "id": "kg-spaces.context.ask-document",
         "order": 601,
-        "icon": "hub",
+        "icon": "question_answer",
         "title": "Ask KG Spaces about this document",
         "actions": {
           "click": "kg-spaces.actions.ask-about"
@@ -112,7 +120,7 @@
       {
         "id": "kg-spaces.context.ask-folder",
         "order": 602,
-        "icon": "hub",
+        "icon": "question_answer",
         "title": "Ask KG Spaces about this folder",
         "actions": {
           "click": "kg-spaces.actions.ask-about"
@@ -132,7 +140,7 @@
             {
               "id": "kg-spaces.viewer.ask-document",
               "order": 10,
-              "icon": "hub",
+              "icon": "question_answer",
               "title": "Ask KG Spaces about this document",
               "actions": {
                 "click": "kg-spaces.actions.ask-about"

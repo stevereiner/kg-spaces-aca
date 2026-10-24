@@ -4,7 +4,12 @@
   <div class="kg-spaces-title-bar">
     <h1 class="kg-spaces-title"><mat-icon class="kg-spaces-title-icon">hub</mat-icon>KG Spaces</h1>
     <span class="kg-spaces-hint" *ngIf="titleHint" [title]="titleHint">{{ titleHint }}</span>
-    <app-source-sign-in [light]="true"></app-source-sign-in>
+    <!-- top right: who the user is in ACA's Alfresco (ACA's session: no sign-out here), then the sign-in
+         pill for the other sources -->
+    <div class="kg-spaces-identity">
+      <app-host-identity source="alfresco" [user]="acaUser" [url]="acaUrl" [light]="true"></app-host-identity>
+      <app-source-sign-in [light]="true"></app-source-sign-in>
+    </div>
   </div>
   <mat-card class="kg-spaces-card">
     <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="kg-spaces-tabs">

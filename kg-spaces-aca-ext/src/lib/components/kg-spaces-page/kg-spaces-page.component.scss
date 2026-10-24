@@ -27,6 +27,13 @@
 
 // How to use the page, between the title and the sign-in pill; cut off with "…" when narrow
 // (the whole text is in its tooltip)
+// the host user and the sign-in pill, together at the right
+.kg-spaces-identity {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
 .kg-spaces-hint {
   margin-left: 32px;  // on top of the bar's gap: set apart from the title
   flex: 1;

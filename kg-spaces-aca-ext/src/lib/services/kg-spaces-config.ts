@@ -1,5 +1,5 @@
 import { Router } from '@angular/router';
-import { AppConfigService } from '@alfresco/adf-core';
+import { AppConfigService, AuthenticationService } from '@alfresco/adf-core';
 import { FlexibleGraphragConfig, SourceDocument } from '@flexible-graphrag/angular-ui';
 import { findEcmTicket } from './ecm-ticket.util';
 
@@ -10,7 +10,8 @@ import { findEcmTicket } from './ecm-ticket.util';
  * Only `apiUrl` really matters here: the Alfresco base URL comes from ACA's `ecmHost`, and the
  * other source types keep the library's defaults.
  */
-export function kgSpacesConfigFactory(appConfig: AppConfigService, router: Router): FlexibleGraphragConfig {
+export function kgSpacesConfigFactory(appConfig: AppConfigService, router: Router,
+                                      authentication: AuthenticationService): FlexibleGraphragConfig {
   // An Alfresco document a result or answer came from opens in ACA's own viewer, in this tab,
   // the way Angel Borroy's ext-rag does, with `location` sending the viewer's close (X) back to
   // KG Spaces. It opens over the document's folder in the Repository view (the backend supplies
@@ -52,6 +53,10 @@ export function kgSpacesConfigFactory(appConfig: AppConfigService, router: Route
       'Use "Ask KG Spaces about this document" or "...this folder" in ACA to ask about just that.',
     ]),
     showChatScope: appConfig.get<boolean>('plugins.kgSpaces.showChatScope', true),
+    // "Run in background" starts on: the user goes back to ACA's file lists, or sends another
+    // selection, while a job runs; jobs carry on and are followed on the Jobs sub-tab. A library
+    // 0.9.0 setting, spread so this still compiles against 0.8.x (which ignores it).
+    ...{ runInBackground: appConfig.get<boolean>('plugins.kgSpaces.runInBackground', true) },
     // Result / answer source documents: Alfresco nodes open in ACA's viewer (see above)
     openDocument: openInViewer,
     canOpenDocument: isAlfrescoNode,
@@ -62,6 +67,9 @@ export function kgSpacesConfigFactory(appConfig: AppConfigService, router: Route
       const ticket = findEcmTicket();
       return ticket ? { 'X-Alfresco-Ticket': ticket } : {};
     },
+    // The ACA user owns the ingests they start: the Jobs sub-tab lists (and clears) only theirs,
+    // plus the auto-sync runs everyone sees
+    currentUser: () => authentication.getUsername() || null,
     // ...and the user's sign-ins to every OTHER source (Nuxeo, CMIS, another Alfresco, Microsoft
     // 365, Box, Google, Azure, S3) from the sign-in icon on the KG Spaces tab bar, so their
     // documents are filtered to what this user may read as well. ACA's own Alfresco never asks:

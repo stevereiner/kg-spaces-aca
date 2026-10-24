@@ -6,6 +6,11 @@ server {
     # would reject most documents before they reach the backend.
     client_max_body_size 200m;
 
+    # Alfresco and the backend are looked up per request (variables below), so a backend container recreated with a
+    # new address is found again, and this starts even when one of them is down; NGINX_LOCAL_RESOLVERS comes from the
+    # nginx image's 15-local-resolvers.envsh
+    resolver ${NGINX_LOCAL_RESOLVERS} valid=30s;
+
     # ACA's static files
     location / {
         root   /usr/share/nginx/html;
@@ -16,7 +21,8 @@ server {
     # Alfresco. ADF's ecmHost stays at its same-origin default, so every repository call
     # from the browser arrives here.
     location /alfresco/ {
-        proxy_pass ${ALFRESCO_URL}/alfresco/;
+        set $alfresco_upstream ${ALFRESCO_URL};
+        proxy_pass $alfresco_upstream;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -26,7 +32,8 @@ server {
     # Flexible GraphRAG backend. AI query and chat wait on an LLM, and a synchronous call can
     # run for minutes, so the read timeout is generous.
     location /api/ {
-        proxy_pass ${FLEXIBLE_GRAPHRAG_URL}/api/;
+        set $backend_upstream ${FLEXIBLE_GRAPHRAG_URL};
+        proxy_pass $backend_upstream;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
