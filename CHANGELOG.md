@@ -4,6 +4,17 @@ All notable changes to KG Spaces for Alfresco Content App are documented in this
 follow the [Flexible GraphRAG](https://github.com/stevereiner/flexible-graphrag) release they go
 with, and the `@flexible-graphrag/angular-ui` library version they need.
 
+## [2026-11-04] — v0.9.1: goes with Flexible GraphRAG 0.9.1
+
+### Changed
+
+- Version 0.9.1. Requires `@flexible-graphrag/angular-ui` ^0.9.1 (no UI changes from 0.9.0) and
+  a Flexible GraphRAG 0.9.1+ backend. The backend's 0.9.1 brings OpenArch in its Docker Compose
+  stack, faster KG extraction (`KG_EXTRACTION_WORKERS`), security fixes (filesystem ingest
+  limited to allowed folders, query injection fixes in several graph adapters and the RDF
+  converter, graph Q&A runs only read queries; see its SECURITY.md) and Python 3.15 preparatory
+  work.
+
 ## [2026-10-19] — v0.8.6: sign-ins for the other sources, title bar
 
 ### Added
