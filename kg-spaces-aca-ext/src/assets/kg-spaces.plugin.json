@@ -86,6 +86,34 @@
                 "app.selection.folder"
               ]
             }
+          },
+          {
+            "id": "kg-spaces.toolbar.graph-document",
+            "order": 40,
+            "icon": "account_tree",
+            "title": "View KG Spaces graph of this document",
+            "actions": {
+              "click": "kg-spaces.actions.view-graph"
+            },
+            "rules": {
+              "visible": [
+                "app.selection.file"
+              ]
+            }
+          },
+          {
+            "id": "kg-spaces.toolbar.graph-folder",
+            "order": 50,
+            "icon": "account_tree",
+            "title": "View KG Spaces graph of this folder",
+            "actions": {
+              "click": "kg-spaces.actions.view-graph"
+            },
+            "rules": {
+              "visible": [
+                "app.selection.folder"
+              ]
+            }
           }
         ]
       }
@@ -130,6 +158,34 @@
             "app.selection.folder"
           ]
         }
+      },
+      {
+        "id": "kg-spaces.context.graph-document",
+        "order": 603,
+        "icon": "account_tree",
+        "title": "View KG Spaces graph of this document",
+        "actions": {
+          "click": "kg-spaces.actions.view-graph"
+        },
+        "rules": {
+          "visible": [
+            "app.selection.file"
+          ]
+        }
+      },
+      {
+        "id": "kg-spaces.context.graph-folder",
+        "order": 604,
+        "icon": "account_tree",
+        "title": "View KG Spaces graph of this folder",
+        "actions": {
+          "click": "kg-spaces.actions.view-graph"
+        },
+        "rules": {
+          "visible": [
+            "app.selection.folder"
+          ]
+        }
       }
     ],
     "viewer": {
@@ -144,6 +200,15 @@
               "title": "Ask KG Spaces about this document",
               "actions": {
                 "click": "kg-spaces.actions.ask-about"
+              }
+            },
+            {
+              "id": "kg-spaces.viewer.graph-document",
+              "order": 20,
+              "icon": "account_tree",
+              "title": "View KG Spaces graph of this document",
+              "actions": {
+                "click": "kg-spaces.actions.view-graph"
               }
             }
           ]
@@ -166,6 +231,11 @@
       "id": "kg-spaces.actions.ask-about",
       "type": "NAVIGATE_URL",
       "payload": "$('/kg-spaces?tab=chat&nodeId=' + encodeURIComponent(context.selection.first.entry.id) + '&nodeName=' + encodeURIComponent(context.selection.first.entry.name) + '&isFolder=' + !!context.selection.first.entry.isFolder)"
+    },
+    {
+      "id": "kg-spaces.actions.view-graph",
+      "type": "NAVIGATE_URL",
+      "payload": "$('/kg-spaces?tab=graph&nodeId=' + encodeURIComponent(context.selection.first.entry.id) + '&nodeName=' + encodeURIComponent(context.selection.first.entry.name) + '&isFolder=' + !!context.selection.first.entry.isFolder)"
     }
   ]
 }

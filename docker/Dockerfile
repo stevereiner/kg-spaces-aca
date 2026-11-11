@@ -76,7 +76,7 @@ COPY --from=fglib /lib/              /tmp/fglib/
 RUN node /tmp/kg-spaces/patch-aca.mjs /build /tmp/kg-spaces/app.config.snippet.json
 
 RUN npm ci --no-audit --no-fund --legacy-peer-deps \
- && npm install --no-audit --no-fund --legacy-peer-deps /tmp/fglib/flexible-graphrag-angular-ui-*.tgz
+ && npm install --no-audit --no-fund --legacy-peer-deps /tmp/fglib/flexible-graphrag-*.tgz
 RUN npx nx build content-ce --configuration=production
 
 # ---- serve ----------------------------------------------------------------------------------

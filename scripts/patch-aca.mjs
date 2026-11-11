@@ -4,7 +4,8 @@
  *
  * Does install steps 3-6 from the README in one go, and is what the Docker build runs:
  *   3. register provideKgSpacesExtension() in app/src/app/extensions.module.ts
- *   4. add the plugin JSON and agent icon asset globs to app/project.json
+ *   4. add the plugin JSON and agent icon asset globs to app/project.json, and allow the GRAPH
+ *      tab's CommonJS dependencies (Cytoscape) there
  *   5. merge plugins.kgSpaces into app/src/app.config.json
  *   6. add the /api entry (the Flexible GraphRAG backend) to the dev server's app/proxy.conf.js
  *      (the dev server only; a production build doesn't use that file)
@@ -30,6 +31,10 @@ const snippetPath = process.argv[3] || join(here, '..', 'config', 'app.config.sn
 const EXT_DIR = 'projects/kg-spaces-aca-ext';
 const IMPORT_LINE =
   "import { provideKgSpacesExtension } from '../../../projects/kg-spaces-aca-ext/src/public-api';";
+const CYTOSCAPE_COMMONJS = [
+  'cytoscape', 'cytoscape-fcose', 'cytoscape-dagre', 'cose-base', 'layout-base',
+  '@dagrejs/dagre', '@dagrejs/graphlib',
+];
 
 // --- 3. extensions.module.ts -------------------------------------------------------------
 {
@@ -69,8 +74,19 @@ const IMPORT_LINE =
       added++;
     }
   }
-  if (added) writeFileSync(file, JSON.stringify(pj, null, 2) + '\n');
+  // The GRAPH tab's Cytoscape and its layouts are CommonJS: allowed, so the build doesn't warn
+  const options = pj.targets.build.options;
+  const commonJs = (options.allowedCommonJsDependencies = options.allowedCommonJsDependencies || []);
+  let allowed = 0;
+  for (const dep of CYTOSCAPE_COMMONJS) {
+    if (!commonJs.includes(dep)) {
+      commonJs.push(dep);
+      allowed++;
+    }
+  }
+  if (added || allowed) writeFileSync(file, JSON.stringify(pj, null, 2) + '\n');
   console.log(`project.json: ${added ? `added ${added} asset glob(s)` : 'asset globs already present'}`);
+  console.log(`project.json: ${allowed ? `allowed ${allowed} CommonJS dependencies` : 'CommonJS dependencies already allowed'}`);
 }
 
 // --- 5. app.config.json plugins.kgSpaces -------------------------------------------------

@@ -3,7 +3,9 @@ rem Rebuild @flexible-graphrag/angular-ui from a local Flexible GraphRAG checkou
 rem (Windows; see install-lib-into-aca.sh). FG_UI and ACA as there: by default a ..\flexible-graphrag (or
 rem ..\..\newdev3\flexible-graphrag) checkout and ..\alfresco-content-app next to this repository. npm when the ACA
 rem checkout has a package-lock.json (ACA 8.0.0), else pnpm when it has a pnpm-lock.yaml (ACA's develop branch). Clears ACA's .angular\cache (the library version doesn't change
-rem between dev packs, so the CLI would keep serving the old compiled copy).
+rem between dev packs, so the CLI would keep serving the old compiled copy). pack:lib also packs
+rem @flexible-graphrag/graph-view (a dependency of the library), installed with it: until that version is on npm the
+rem library tarball alone would fail to install. Without a graph-view tarball, npm's is used.
 setlocal
 set "HERE=%~dp0.."
 if "%FG_UI%"=="" if exist "%HERE%\..\flexible-graphrag\flexible-graphrag-ui\frontend-angular" set "FG_UI=%HERE%\..\flexible-graphrag\flexible-graphrag-ui\frontend-angular"
@@ -20,15 +22,19 @@ popd
 set "TARBALL="
 for /f "delims=" %%F in ('dir /b /o-d "%FG_UI%\dist\flexible-graphrag-angular-ui-*.tgz"') do if not defined TARBALL set "TARBALL=%FG_UI%\dist\%%F"
 if "%TARBALL%"=="" (echo no library tarball in %FG_UI%\dist & exit /b 1)
+set "GRAPH_VIEW="
+for /f "delims=" %%F in ('dir /b /o-d "%FG_UI%\dist\flexible-graphrag-graph-view-*.tgz" 2^>nul') do if not defined GRAPH_VIEW set "GRAPH_VIEW=%FG_UI%\dist\%%F"
+set TARBALLS="%TARBALL%"
+if defined GRAPH_VIEW set TARBALLS="%TARBALL%" "%GRAPH_VIEW%"
 
-echo ==^> installing %TARBALL% into %ACA%
+echo ==^> installing %TARBALLS% into %ACA%
 pushd "%ACA%" || exit /b 1
 if exist package-lock.json (
-  call npm install "%TARBALL%" --no-audit --no-fund --legacy-peer-deps || (popd & exit /b 1)
+  call npm install %TARBALLS% --no-audit --no-fund --legacy-peer-deps || (popd & exit /b 1)
 ) else if exist pnpm-lock.yaml (
-  call pnpm add "%TARBALL%" || (popd & exit /b 1)
+  call pnpm add %TARBALLS% || (popd & exit /b 1)
 ) else (
-  call npm install "%TARBALL%" --no-audit --no-fund --legacy-peer-deps || (popd & exit /b 1)
+  call npm install %TARBALLS% --no-audit --no-fund --legacy-peer-deps || (popd & exit /b 1)
 )
 popd
 

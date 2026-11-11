@@ -9,6 +9,10 @@
 # used: npm when the checkout has a package-lock.json (ACA 8.0.0), else pnpm when it has a
 # pnpm-lock.yaml (ACA's develop branch; a pnpm-lock.yaml left behind by switching branches is ignored).
 #
+# `npm run pack:lib` also packs @flexible-graphrag/graph-view (the GRAPH tab's view, a dependency of
+# the library), and both are installed together: until that version of graph-view is on npm, the
+# library tarball alone would fail to install. Without a graph-view tarball, npm's is used.
+#
 # The cache clear is not optional. The library version does not change between dev packs, so
 # installing the tarball replaces the files on disk while the Angular CLI keeps serving the
 # previously compiled copy from .angular/cache. The symptom is silent and very confusing:
@@ -30,11 +34,14 @@ echo "==> building + packing the library in $FG_UI"
 ( cd "$FG_UI" && npm run pack:lib )
 
 TARBALL=$(ls -t "$FG_UI"/dist/flexible-graphrag-angular-ui-*.tgz | head -1)
-echo "==> installing $(basename "$TARBALL") into $ACA"
+GRAPH_VIEW=$(ls -t "$FG_UI"/dist/flexible-graphrag-graph-view-*.tgz 2>/dev/null | head -1 || true)
+TARBALLS=("$TARBALL")
+[ -n "$GRAPH_VIEW" ] && TARBALLS+=("$GRAPH_VIEW")
+echo "==> installing ${TARBALLS[*]##*/} into $ACA"
 if [ ! -f "$ACA/package-lock.json" ] && [ -f "$ACA/pnpm-lock.yaml" ]; then
-  ( cd "$ACA" && pnpm add "$TARBALL" )
+  ( cd "$ACA" && pnpm add "${TARBALLS[@]}" )
 else
-  ( cd "$ACA" && npm install "$TARBALL" --no-audit --no-fund --legacy-peer-deps )
+  ( cd "$ACA" && npm install "${TARBALLS[@]}" --no-audit --no-fund --legacy-peer-deps )
 fi
 
 echo "==> clearing the Angular CLI cache (see note above)"

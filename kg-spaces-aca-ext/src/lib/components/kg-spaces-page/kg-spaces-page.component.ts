@@ -8,11 +8,11 @@ import { FlexibleGraphragUiModule } from '@flexible-graphrag/angular-ui';
 import { findEcmTicket } from '../../services/ecm-ticket.util';
 import { AcaSelectionService } from '../../services/aca-selection.service';
 import { FlexibleGraphragConfigService, ProcessingSessionService } from '@flexible-graphrag/angular-ui';
-import type { AskScope } from '@flexible-graphrag/angular-ui';
+import type { AskScope, GraphShowEvent } from '@flexible-graphrag/angular-ui';
 import { AppConfigService, AuthenticationService } from '@alfresco/adf-core';
 
 /**
- * The KG Spaces page: the four Flexible GraphRAG tabs hosted inside ACA.
+ * The KG Spaces page: the five Flexible GraphRAG tabs hosted inside ACA.
  *
  * Standalone, because ACA instantiates it dynamically from `kg-spaces.plugin.json`. It pulls
  * the shared tabs in by importing the library's NgModule -- the same thing ACA's own
@@ -69,8 +69,14 @@ export class KgSpacesPageComponent implements OnInit, OnDestroy {
   configurationTimestamp = 0;
   /** AI CHAT answers only from this document / folder ("Ask KG Spaces about this ..."). */
   chatScope: AskScope | null = null;
+  /** GRAPH shows the property graph of this document / folder ("View KG Spaces graph of this ..."). */
+  graphScope: AskScope | null = null;
+  /** GRAPH shows these instead: a "Show graph" on Processing, Hybrid Search or AI Chat (a job, results, sources). */
+  graph: GraphShowEvent | null = null;
+  graphKey = 0;
 
   private static readonly CHAT_TAB = 3;
+  private static readonly GRAPH_TAB = 4;
 
   /**
    * Pick up a selection handed over by the toolbar button or context menu, which navigate to
@@ -91,6 +97,10 @@ export class KgSpacesPageComponent implements OnInit, OnDestroy {
     this.titleHint = this.hintToShow();
     if (params.get('tab') === 'chat' && params.get('nodeId')) {
       this.askAbout(params.get('nodeId')!, params.get('nodeName') || '', params.get('isFolder') === 'true');
+      return;
+    }
+    if (params.get('tab') === 'graph' && params.get('nodeId')) {
+      this.viewGraph(params.get('nodeId')!, params.get('nodeName') || '', params.get('isFolder') === 'true');
       return;
     }
     const nodeIds = (params.get('nodeIds') || '').split(',').map((s) => s.trim()).filter(Boolean);
@@ -141,12 +151,38 @@ export class KgSpacesPageComponent implements OnInit, OnDestroy {
   private askAbout(nodeId: string, name: string, isFolder: boolean): void {
     this.restoreSelection();
     this.selectedTabIndex = KgSpacesPageComponent.CHAT_TAB;
-    this.chatScope = { data_source: 'alfresco', url: this.fgConfig.alfrescoBaseUrl,
-                       node_id: nodeId, is_folder: isFolder, name: name || undefined };
+    this.chatScope = this.nodeScope(nodeId, name, isFolder);
+    this.withPath(nodeId, name, () => this.chatScope, (scope) => this.chatScope = scope);
+  }
+
+  /** "View KG Spaces graph of this document / folder": open GRAPH on that node, scoped as AI CHAT is. */
+  private viewGraph(nodeId: string, name: string, isFolder: boolean): void {
+    this.restoreSelection();
+    this.selectedTabIndex = KgSpacesPageComponent.GRAPH_TAB;
+    this.graph = null;
+    this.graphScope = this.nodeScope(nodeId, name, isFolder);
+    this.withPath(nodeId, name, () => this.graphScope, (scope) => this.graphScope = scope);
+  }
+
+  /** "Show graph" on another tab: GRAPH on that job's, those results' or those sources' documents. */
+  onShowGraph(event: GraphShowEvent): void {
+    this.graph = event;
+    this.graphKey++;
+    this.selectedTabIndex = KgSpacesPageComponent.GRAPH_TAB;
+  }
+
+  private nodeScope(nodeId: string, name: string, isFolder: boolean): AskScope {
+    return { data_source: 'alfresco', url: this.fgConfig.alfrescoBaseUrl,
+             node_id: nodeId, is_folder: isFolder, name: name || undefined };
+  }
+
+  /** Add the node's path to a scope once resolved, unless the scope moved on to another node meanwhile. */
+  private withPath(nodeId: string, name: string, get: () => AskScope | null, set: (scope: AskScope) => void): void {
     this.selection.resolveNodeDetails([nodeId]).subscribe((details) => {
       const node = details[0];
-      if (node && this.chatScope?.node_id === nodeId) {
-        this.chatScope = { ...this.chatScope, path: node.path, name: name || node.name, is_folder: !!node.isFolder };
+      const scope = get();
+      if (node && scope?.node_id === nodeId) {
+        set({ ...scope, path: node.path, name: name || node.name, is_folder: !!node.isFolder });
       }
     });
   }
@@ -201,6 +237,9 @@ export class KgSpacesPageComponent implements OnInit, OnDestroy {
     this.session.hostSelection = {
       owner: this.owner(),
       chatScope: this.chatScope,
+      graphScope: this.graphScope,
+      graph: this.graph,
+      graphKey: this.graphKey,
       selectedTabIndex: this.selectedTabIndex,
       hasConfiguredSources: this.hasConfiguredSources,
       configuredDataSource: this.configuredDataSource,

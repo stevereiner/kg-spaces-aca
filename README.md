@@ -1,7 +1,7 @@
 # KG Spaces for Alfresco Content App (ACA)
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Flexible GraphRAG](https://img.shields.io/badge/Flexible%20GraphRAG-0.9.1-2E7D32.svg)](https://github.com/stevereiner/flexible-graphrag)
+[![Flexible GraphRAG](https://img.shields.io/badge/Flexible%20GraphRAG-0.10.0-2E7D32.svg)](https://github.com/stevereiner/flexible-graphrag)
 [![ACA](https://img.shields.io/badge/Alfresco%20Content%20App-8.0.0-00BCD4.svg)](https://github.com/Alfresco/alfresco-content-app)
 [![ADF](https://img.shields.io/badge/Alfresco%20ADF-9.0.0-7C4DFF.svg)](https://github.com/Alfresco/alfresco-ng2-components)
 [![Angular](https://img.shields.io/badge/Angular-20.3-DD0031.svg)](https://angular.dev/)
@@ -49,7 +49,7 @@ your own ACA (or ADW).
 | `docker/` | an image that builds ACA with the extension and serves it with nginx |
 | `screen-shots/` | images used in this README |
 
-The four tabs — Sources, Processing, Hybrid Search, AI Chat — are **not** duplicated here.
+The five tabs — Sources, Processing, Hybrid Search, AI Chat, Graph — are **not** duplicated here.
 They come from [`@flexible-graphrag/angular-ui`](https://www.npmjs.com/package/@flexible-graphrag/angular-ui),
 the shared library built out of the Flexible GraphRAG repo and published to npm, so the
 standalone app and this extension cannot drift apart.
@@ -80,7 +80,7 @@ for a second sign-in.
   * [KG Spaces Deployment](https://github.com/stevereiner/kg-spaces-deployment), which runs Alfresco Community
     26.2 with KG Spaces ACA already built in, Flexible GraphRAG, Nuxeo with KG Spaces for Nuxeo, and Hyland OpenArch
     in one Docker Compose stack behind one proxy.
-* A running Flexible GraphRAG 0.9.1+ backend (default `http://localhost:8000`).
+* A running Flexible GraphRAG 0.10.0+ backend (default `http://localhost:8000`).
 * Flexible GraphRAG and ACA both configured for your Alfresco.
 * An [ACA 8.0.0](https://github.com/Alfresco/alfresco-content-app) checkout (Angular 20.3, ADF 9.0).
 * Node.js 24 — ACA 8.0.0 pins 24.13.1 in its `.nvmrc`. (Not needed for the
@@ -228,7 +228,7 @@ docker build -t kg-spaces-aca -f docker/Dockerfile .
 ```
 
 The shared UI library comes from npm by default (`LIB_SOURCE=npm`, latest version; pin one with
-`--build-arg LIB_VERSION=0.9.1`). Two other sources are there for unreleased library changes:
+`--build-arg LIB_VERSION=0.10.0`). Two other sources are there for unreleased library changes:
 
 **From a Flexible GraphRAG clone.** The build clones `FG_REPO` at `FG_REF` and packs the
 library inside the image:
@@ -306,8 +306,9 @@ login.
 * **To process Alfresco content**, select files and/or folders in ACA's own document list, then
   open the **KG Spaces** menu (the graph icon) in the toolbar, or right-click, and choose
   **Add to KG Spaces**. KG Spaces opens on the PROCESSING tab with that selection already
-  configured. The same menu has **Ask KG Spaces about this document** / **this folder** (see
-  *Ask about one document or folder* below).
+  configured. The same menu has **Ask KG Spaces about this document** / **this folder** and
+  **View KG Spaces graph of this document** / **this folder** (see *Ask about one document or
+  folder* and *The graph of one document or folder* below).
 * **KG Spaces** in the left navigation opens the page directly — for HYBRID SEARCH, AI CHAT, or
   ingesting from OTHER SOURCES. It has no Alfresco picker of its own, so Alfresco content always
   starts from a selection in the document list.
@@ -323,7 +324,7 @@ uses **Add to KG Spaces** (change its text or when it shows with `titleHint` / `
 documents are in the stores, each signed in or offline (e.g. "Sign-ins 1/3"); see
 *Documents from other sources* below. It is hidden with `searchSignIn: false`.
 
-### The four tabs
+### The five tabs
 
 | Tab | What it does |
 | --- | --- |
@@ -331,6 +332,7 @@ documents are in the stores, each signed in or offline (e.g. "Sign-ins 1/3"); se
 | **PROCESSING** | review the selection and ingest it |
 | **HYBRID SEARCH** | hybrid search plus AI query over what has been ingested |
 | **AI CHAT** | conversational questions over the same content |
+| **GRAPH** | the property graph (entities, relationships, chunks) extracted from one document or folder |
 
 Alfresco is not in the OTHER SOURCES list because ACA's document list is the Alfresco picker —
 see [Configure the backend URL](#5-configure-the-backend-url) to change that.
@@ -383,6 +385,13 @@ menu (the graph icon) in the toolbar, or right-click it, and choose **Ask KG Spa
 Spaces about this folder**. AI CHAT opens with an *Asking about: …* bar, and answers come only
 from that document or folder; each store filters inside the store, so the usual number of
 results is spent on it. If nothing from it has been processed yet, the answer says to add it to KG Spaces first.
+
+**The graph of one document or folder.** The same menu (toolbar, right-click, or the viewer's
+⋮ menu for a document) has **View KG Spaces graph of this document** / **this folder**. GRAPH
+opens with the entities, relationships and chunks extracted from it: choose a layout, show or
+hide entity types, chunks and relationship types, click a node or relationship for its
+properties, double-click a node to bring in its neighbours. It needs what Ask does (the backend's
+incremental registry) and a property graph store; it shows only documents you may read.
 
 **Answers only from documents you may read.** Search results, AI QUERY and AI CHAT answers
 come only from documents your own signed-in user can read: for ACA's Alfresco the backend checks
