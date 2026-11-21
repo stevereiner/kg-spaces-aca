@@ -4,6 +4,18 @@ All notable changes to KG Spaces for Alfresco Content App are documented in this
 follow the [Flexible GraphRAG](https://github.com/stevereiner/flexible-graphrag) release they go
 with, and the `@flexible-graphrag/angular-ui` library version they need.
 
+## [2026-11-16] — v0.11.0: goes with Flexible GraphRAG 0.11.0
+
+### Changed
+
+- Version 0.11.0. Requires `@flexible-graphrag/angular-ui` ^0.11.0, for a Flexible GraphRAG
+  0.11.0 backend. From the library:
+  - **Browse...** in the Sources tab's repository and cloud forms (Alfresco, CMIS, Nuxeo, S3,
+    Google Cloud Storage, Azure Blob, Box, Google Drive, OneDrive, SharePoint): pick folders and
+    documents one folder level at a time (the backend's `/api/browse`);
+  - when the backend fuses results from other backends, those backends' sources and sign-ins
+    show with the backend's name.
+
 ## [2026-11-10] — v0.10.0: goes with Flexible GraphRAG 0.10.0
 
 ### Added
